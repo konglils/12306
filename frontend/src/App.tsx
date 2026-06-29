@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { Link, Route, Routes, useLocation } from 'react-router-dom'
 import Home from './pages/Home'
 import Tickets from './pages/Tickets'
+import Trains from './pages/Trains'
 import { useStations } from './store/stations'
 
 function NavLink({ to, children }: { to: string; children: React.ReactNode }) {
@@ -34,6 +35,7 @@ export default function App() {
         </Link>
         <nav className="flex items-stretch gap-0 font-semibold h-full">
           <NavLink to="/tickets">车票</NavLink>
+          <NavLink to="/trains">时刻表</NavLink>
         </nav>
         <div className="flex gap-2 ml-auto">
           <Link
@@ -55,6 +57,8 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/tickets" element={<Tickets />} />
+          <Route path="/trains" element={<Trains />} />
+          <Route path="/trains/:code" element={<Trains />} />
         </Routes>
       </main>
     </div>

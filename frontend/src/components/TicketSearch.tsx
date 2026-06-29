@@ -48,11 +48,12 @@ export default function TicketSearch({ fromCode, toCode, date, onSearch }: Props
   }
 
   function swap() {
-    const tmp = from
+    const tmpInput = fromInput
+    const tmpFrom = from
+    setFromInput(toInput)
     setFrom(to)
-    setTo(tmp)
-    setFromInput(stations[to] || '')
-    setToInput(stations[tmp] || '')
+    setToInput(tmpInput)
+    setTo(tmpFrom)
   }
 
   function search() {

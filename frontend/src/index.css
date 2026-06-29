@@ -1,1 +1,18 @@
 @import "tailwindcss";
+
+@theme {
+  --color-primary:    oklch(0.3423 0.0709 251.85);
+  --color-primary-hi: oklch(0.28 0.06 252);
+  --color-accent:     oklch(0.577 0.245 27.325);
+  --color-gold:       oklch(0.769 0.188 70.08);
+  --color-page:   oklch(0.985 0 0);
+  --color-card:   oklch(1 0 0);
+  --color-ink:    oklch(0.21 0.006 85);
+  --color-muted:  oklch(0.552 0.016 85);
+  --color-stroke: oklch(0.705 0.015 85);
+  --color-sep:    oklch(0.92 0.004 85);
+}
+
+html {
+  font-family: "Helvetica Neue", "Arial", "Noto Sans CJK SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+}

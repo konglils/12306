@@ -20,7 +20,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ThreadLocalRandom;
 
 @Service
 public class RailCache {
@@ -31,11 +30,10 @@ public class RailCache {
     private final PriceMapper priceMapper;
 
     private Map<Long, String> telecodeById;
-    private Map<Long, String> nameById;
+    private Map<String, String> nameByTelecode;
     private Map<String, Long> stationIdByTelecode;
 
     private Map<Long, String> trainCodesByTrainId;
-    private Map<String, Long> trainIdByAnyCode;
     private Map<Long, String> styleByTrainId;
 
     private Map<Long, Map<Long, TrainStationEntity>> stopByTrainAndStation;
@@ -63,12 +61,12 @@ public class RailCache {
 
     private void loadStations() {
         telecodeById = new HashMap<>();
-        nameById = new HashMap<>();
+        nameByTelecode = new HashMap<>();
         stationIdByTelecode = new HashMap<>();
 
         for (StationEntity s : stationMapper.selectAll()) {
             telecodeById.put(s.id(), s.telecode());
-            nameById.put(s.id(), s.name());
+            nameByTelecode.put(s.telecode(), s.name());
             stationIdByTelecode.put(s.telecode(), s.id());
         }
     }
@@ -125,7 +123,6 @@ public class RailCache {
     }
 
     private void buildTrains() {
-        trainIdByAnyCode = new HashMap<>();
         trainByAnyCode = new HashMap<>();
 
         for (Long trainId : stopByTrainAndStation.keySet()) {
@@ -150,7 +147,6 @@ public class RailCache {
             Train train = new Train(codes, style, stations);
 
             for (String code : codes.split("/")) {
-                trainIdByAnyCode.put(code, trainId);
                 trainByAnyCode.put(code, train);
             }
         }
@@ -190,6 +186,10 @@ public class RailCache {
 
     public Train getTrain(String trainCode) {
         return trainByAnyCode.get(trainCode);
+    }
+
+    public Map<String, String> getStations() {
+        return nameByTelecode;
     }
 
     // 价格编码: 每7字符一组，格式 <类型(1)><价格_角(5)><标记(1)>

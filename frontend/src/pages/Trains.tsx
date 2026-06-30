@@ -24,7 +24,7 @@ export default function Trains() {
   function lookup(query?: string) {
     const c = (query || inputCode).toUpperCase()
     if (!c) return
-    setSearchParams({ code: c })
+    setSearchParams({ code: c }, { replace: true })
     setError('')
     setLoading(true)
     axios.get('/api/trains', { params: { code: c } })

@@ -3,6 +3,7 @@ import { Link, Route, Routes, useLocation } from 'react-router-dom'
 import Home from './pages/Home'
 import Tickets from './pages/Tickets'
 import Trains from './pages/Trains'
+import Signup from './pages/Signup'
 import { useStations } from './store/stations'
 
 function NavLink({ to, children }: { to: string; children: React.ReactNode }) {
@@ -39,13 +40,13 @@ export default function App() {
         </nav>
         <div className="flex gap-2 ml-auto">
           <Link
-            to="/login"
+            to="/signin"
             className="px-4 py-2 border text-sm font-semibold no-underline text-primary border-primary transition-all hover:bg-primary hover:text-white"
           >
             登 录
           </Link>
           <Link
-            to="/register"
+            to="/signup"
             className="px-4 py-2 border text-sm font-semibold no-underline bg-primary text-white border-primary transition-all hover:bg-white hover:text-primary"
           >
             注 册
@@ -59,6 +60,7 @@ export default function App() {
           <Route path="/tickets" element={<Tickets />} />
           <Route path="/trains" element={<Trains />} />
           <Route path="/trains/:code" element={<Trains />} />
+          <Route path="/signup" element={<Signup />} />
         </Routes>
       </main>
     </div>

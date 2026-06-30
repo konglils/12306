@@ -5,6 +5,7 @@ import Tickets from './pages/Tickets'
 import Trains from './pages/Trains'
 import Signin from './pages/Signin'
 import Signup from './pages/Signup'
+import NotFound from './pages/NotFound'
 import { useStations } from './store/stations'
 import { useAuth } from './store/auth'
 
@@ -86,6 +87,7 @@ export default function App() {
           <Route path="/trains" element={<Trains />} />
           <Route path="/signin" element={<Signin />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
     </div>

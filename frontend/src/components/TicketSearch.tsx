@@ -116,9 +116,10 @@ export default function TicketSearch({ fromCode, toCode, date, onSearch }: Props
                 <li
                   key={code}
                   onMouseDown={() => selectStation('from', code, name)}
-                  className="px-2.5 py-1.5 text-sm text-ink cursor-pointer hover:bg-primary hover:text-white"
+                  className="pl-2.5 pr-5 py-1.5 text-sm text-ink cursor-pointer hover:bg-primary hover:text-white flex justify-between items-baseline"
                 >
-                  {name}
+                  <span>{name}</span>
+                  <span className="text-xs text-muted ml-3 tabular-nums">{code}</span>
                 </li>
               ))}
             </ul>
@@ -151,9 +152,10 @@ export default function TicketSearch({ fromCode, toCode, date, onSearch }: Props
                 <li
                   key={code}
                   onMouseDown={() => selectStation('to', code, name)}
-                  className="px-2.5 py-1.5 text-sm text-ink cursor-pointer hover:bg-primary hover:text-white"
+                  className="pl-2.5 pr-5 py-1.5 text-sm text-ink cursor-pointer hover:bg-primary hover:text-white flex justify-between items-baseline"
                 >
-                  {name}
+                  <span>{name}</span>
+                  <span className="text-xs text-muted ml-3 tabular-nums">{code}</span>
                 </li>
               ))}
             </ul>

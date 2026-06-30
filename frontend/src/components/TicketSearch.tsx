@@ -37,7 +37,7 @@ export default function TicketSearch({ fromCode, toCode, date, onSearch }: Props
   const suggestions = Object.entries(stations)  // [code, name][]
 
   function filterSuggestions(input: string) {
-    return suggestions.filter(([, name]) => name.includes(input)).sort()
+    return suggestions.filter(([, name]) => name.includes(input)).sort((a, b) => a[1].localeCompare(b[1], 'zh'))
   }
 
   const fromHints = filterSuggestions(fromInput)

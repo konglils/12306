@@ -29,7 +29,7 @@ public class SessionController {
         return ResponseEntity.ok().build();
     }
 
-    @DeleteMapping("/sessions")
+    @DeleteMapping("/session")
     public ResponseEntity<Void> logout(HttpSession session) {
         session.invalidate();
         return ResponseEntity.noContent().build();

@@ -1,24 +1,24 @@
 import { useEffect, useState } from 'react'
-import { useParams, useSearchParams } from 'react-router-dom'
+import { useSearchParams } from 'react-router-dom'
 import axios from 'axios'
 import type { Train } from '../types'
 import { useStations } from '../store/stations'
 
 export default function Trains() {
-  const { code: pathCode } = useParams<{ code?: string }>()
   const [searchParams, setSearchParams] = useSearchParams()
   const stations = useStations(s => s.stations)
 
-  const queryCode = searchParams.get('code') || ''
-  const initCode = pathCode || queryCode
-
-  const [inputCode, setInputCode] = useState(initCode)
+  const [inputCode, setInputCode] = useState('')
   const [train, setTrain] = useState<Train | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
   useEffect(() => {
-    if (initCode) lookup(initCode)
+    const code = searchParams.get('code')
+    if (code) {
+      setInputCode(code)
+      lookup(code)
+    }
   }, [])
 
   function lookup(query?: string) {

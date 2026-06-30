@@ -5,6 +5,13 @@ import TicketSearch from '../components/TicketSearch'
 import { useStations } from '../store/stations'
 import type { Ticket } from '../types'
 
+function formatDate(d: string): string {
+  if (!d) return ''
+  const date = new Date(d + 'T00:00:00')
+  const week = ['日', '一', '二', '三', '四', '五', '六']
+  return `${date.getMonth() + 1}月${date.getDate()}日 星期${week[date.getDay()]}`
+}
+
 function formatPrice(price: number): string {
   return String(price).replace(/\B(?=(\d{3})+(?!\d))/g, ',')
 }
@@ -57,7 +64,7 @@ export default function Tickets() {
               {fromName} <span className="text-gold mx-[0.3em]">—</span> {toName}
             </span>
             <span className="text-sm text-muted ml-2.5">
-              {date}
+              {formatDate(date)}
             </span>
             <span className="text-xs text-muted ml-auto">
               共计 <span className="text-primary font-semibold">{tickets.length}</span> 个车次

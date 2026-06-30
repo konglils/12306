@@ -27,7 +27,7 @@ export default function Trains() {
     setSearchParams({ code: c })
     setError('')
     setLoading(true)
-    axios.get(`/api/trains/${c}`)
+    axios.get('/api/trains', { params: { code: c } })
       .then(res => { setTrain(res.data); setError('') })
       .catch(() => { setTrain(null); setError('未找到该车次') })
       .finally(() => setLoading(false))

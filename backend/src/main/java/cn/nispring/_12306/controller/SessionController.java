@@ -7,12 +7,15 @@ import cn.nispring._12306.service.UserService.BadCredentialsException;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import java.util.Map;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+// TODO 后端重启后 HttpSession 可能会丢失，后续再持久化
 @RestController
 public class SessionController {
 
@@ -20,6 +23,14 @@ public class SessionController {
 
     public SessionController(UserService userService) {
         this.userService = userService;
+    }
+
+    @GetMapping("/session")
+    public ResponseEntity<Map<String, String>> whoami(HttpSession session) {
+        var userId = (Long) session.getAttribute("userId");
+        if (userId == null) return ResponseEntity.noContent().build();
+        var user = userService.findById(userId);
+        return ResponseEntity.ok(Map.of("username", user.username()));
     }
 
     @PostMapping("/sessions")

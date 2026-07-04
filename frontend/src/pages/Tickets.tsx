@@ -44,6 +44,7 @@ export default function Tickets() {
   const fromName = stations[from] || from || '出发站'
   const toName = stations[to] || to || '到达站'
   const hasParams = from && to
+  const gridCols = 1 + Math.max(...tickets.map(t => t.seats.length), 0)
 
   return (
     <div>
@@ -73,33 +74,30 @@ export default function Tickets() {
           </div>
 
           {tickets.map(t => (
-            <Card key={t.trainCode} size="sm">
-              <div
-                className="grid items-center gap-x-3 px-4 py-2.5 bg-primary text-primary-foreground"
-                style={{ gridTemplateColumns: '4rem 1fr auto' }}
-              >
-                <Link to={`/trains?code=${t.trainCode}`} className="text-lg font-extrabold text-primary-foreground no-underline hover:underline">{t.trainCode}</Link>
-                <span className="text-base font-semibold">
-                  {t.startTime} — {t.arriveTime}
-                  {t.arriveDay > 0 && (
-                    <sup className="text-sm text-muted-foreground">+{t.arriveDay}</sup>
-                  )}
-                </span>
-              </div>
-
+            <Card key={t.trainCode}>
               <CardContent>
                 <div
-                  className="grid gap-x-16 gap-y-2"
-                  style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))' }}
+                  className="grid gap-x-10 gap-y-1"
+                  style={{ gridTemplateColumns: `repeat(${gridCols}, 1fr)` }}
                 >
+                  <div className="font-bold text-base">
+                    <Link to={`/trains?code=${t.trainCode}`} className="hover:underline">{t.trainCode}</Link>
+                  </div>
                   {t.seats.map(s => (
-                    <div key={s.type} className="flex justify-between items-baseline border-t border-dotted border-border first:border-t-0">
-                      <span className="text-xs text-muted-foreground">{s.type}</span>
-                      <span className="font-bold text-base text-foreground">
-                        <span className="text-xs mr-px">¥</span>
-                        {formatPrice(s.price / 10)}
-                      </span>
-                    </div>
+                    <div key={s.type} className="text-muted-foreground">{s.type}</div>
+                  ))}
+                  {Array.from({ length: gridCols - 1 - t.seats.length }).map((_, i) => (
+                    <div key={`st-${i}`} />
+                  ))}
+                  <div className="text-muted-foreground">
+                    {t.startTime} — {t.arriveTime}
+                    {t.arriveDay > 0 && ` (+${t.arriveDay})`}
+                  </div>
+                  {t.seats.map(s => (
+                    <div key={s.type} className="font-bold">¥{formatPrice(s.price / 10)}</div>
+                  ))}
+                  {Array.from({ length: gridCols - 1 - t.seats.length }).map((_, i) => (
+                    <div key={`pr-${i}`} />
                   ))}
                 </div>
               </CardContent>

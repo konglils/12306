@@ -75,10 +75,10 @@ export default function Tickets() {
           {tickets.map(t => (
             <Card key={t.trainCode} size="sm">
               <div
-                className="grid items-center gap-x-3 px-4 py-2.5 bg-primary text-white"
+                className="grid items-center gap-x-3 px-4 py-2.5 bg-primary text-primary-foreground"
                 style={{ gridTemplateColumns: '4rem 1fr auto' }}
               >
-                <Link to={`/trains?code=${t.trainCode}`} className="text-lg font-extrabold text-white no-underline hover:underline">{t.trainCode}</Link>
+                <Link to={`/trains?code=${t.trainCode}`} className="text-lg font-extrabold text-primary-foreground no-underline hover:underline">{t.trainCode}</Link>
                 <span className="text-base font-semibold">
                   {t.startTime} — {t.arriveTime}
                   {t.arriveDay > 0 && (

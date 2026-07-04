@@ -77,7 +77,7 @@ export default function Signup() {
           </div>
 
           {error && (
-            <p className="text-sm text-accent">{error}</p>
+            <p className="text-sm text-destructive">{error}</p>
           )}
 
           <Button type="submit" disabled={submitting}>

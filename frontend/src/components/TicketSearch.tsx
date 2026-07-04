@@ -2,6 +2,7 @@ import { useRef, useState } from 'react'
 import { useStations } from '../store/stations'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 
 interface Props {
   fromCode?: string
@@ -102,7 +103,7 @@ export default function TicketSearch({ fromCode, toCode, date, onSearch }: Props
     <section className="bg-card border border-stroke px-6 py-5 mb-5">
       <div className="grid gap-2.5 items-end" style={{ gridTemplateColumns: '1fr auto 1fr 0.7fr auto' }}>
         <div ref={fromRef} className="relative">
-          <label className="block text-xs font-semibold text-muted mb-1">出发站</label>
+          <Label>出发站</Label>
           <Input
             type="text"
             value={fromInput}
@@ -137,7 +138,7 @@ export default function TicketSearch({ fromCode, toCode, date, onSearch }: Props
         </Button>
 
         <div ref={toRef} className="relative">
-          <label className="block text-xs font-semibold text-muted mb-1">到达站</label>
+          <Label>到达站</Label>
           <Input
             type="text"
             value={toInput}
@@ -163,7 +164,7 @@ export default function TicketSearch({ fromCode, toCode, date, onSearch }: Props
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-muted mb-1">出发日期</label>
+          <Label>出发日期</Label>
           <Input
             type="date"
             value={dateInput}

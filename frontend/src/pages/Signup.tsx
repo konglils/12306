@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 
 export default function Signup() {
   const navigate = useNavigate()
@@ -43,7 +44,7 @@ export default function Signup() {
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div>
-            <label className="block text-xs font-semibold text-muted mb-1">用户名</label>
+            <Label>用户名</Label>
             <Input
               type="text"
               value={username}
@@ -53,7 +54,7 @@ export default function Signup() {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-muted mb-1">密码</label>
+            <Label>密码</Label>
             <Input
               type="password"
               value={password}
@@ -63,7 +64,7 @@ export default function Signup() {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-muted mb-1">确认密码</label>
+            <Label>确认密码</Label>
             <Input
               type="password"
               value={confirm}

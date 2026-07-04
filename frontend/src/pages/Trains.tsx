@@ -5,6 +5,7 @@ import type { Train } from '../types'
 import { useStations } from '../store/stations'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 
 export default function Trains() {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -42,7 +43,7 @@ export default function Trains() {
       <section className="bg-card border border-stroke px-6 py-5 mb-5">
         <div className="flex gap-2.5 items-end">
           <div className="flex-1 min-w-0">
-            <label className="block text-xs font-semibold text-muted mb-1">车次号</label>
+            <Label>车次号</Label>
             <Input
               type="text"
               value={inputCode}

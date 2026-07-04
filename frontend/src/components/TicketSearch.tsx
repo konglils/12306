@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import { useStations } from '../store/stations'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 
 interface Props {
   fromCode?: string
@@ -102,14 +103,13 @@ export default function TicketSearch({ fromCode, toCode, date, onSearch }: Props
       <div className="grid gap-2.5 items-end" style={{ gridTemplateColumns: '1fr auto 1fr 0.7fr auto' }}>
         <div ref={fromRef} className="relative">
           <label className="block text-xs font-semibold text-muted mb-1">出发站</label>
-          <input
+          <Input
             type="text"
             value={fromInput}
             onChange={e => handleFromChange(e.target.value)}
             onFocus={() => setFromFocus(true)}
             onBlur={() => setTimeout(() => setFromFocus(false), 150)}
             placeholder="输入出发站"
-            className="w-full h-9 px-2.5 text-sm border border-stroke bg-card text-ink outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
           />
           {fromFocus && fromHints.length > 0 && (
             <ul className="absolute left-0 right-0 top-full mt-1 bg-card border border-stroke z-10 max-h-48 overflow-y-auto">
@@ -138,14 +138,13 @@ export default function TicketSearch({ fromCode, toCode, date, onSearch }: Props
 
         <div ref={toRef} className="relative">
           <label className="block text-xs font-semibold text-muted mb-1">到达站</label>
-          <input
+          <Input
             type="text"
             value={toInput}
             onChange={e => handleToChange(e.target.value)}
             onFocus={() => setToFocus(true)}
             onBlur={() => setTimeout(() => setToFocus(false), 150)}
             placeholder="输入到达站"
-            className="w-full h-9 px-2.5 text-sm border border-stroke bg-card text-ink outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
           />
           {toFocus && toHints.length > 0 && (
             <ul className="absolute left-0 right-0 top-full mt-1 bg-card border border-stroke z-10 max-h-48 overflow-y-auto">
@@ -165,11 +164,10 @@ export default function TicketSearch({ fromCode, toCode, date, onSearch }: Props
 
         <div>
           <label className="block text-xs font-semibold text-muted mb-1">出发日期</label>
-          <input
+          <Input
             type="date"
             value={dateInput}
             onChange={e => setDateInput(e.target.value)}
-            className="w-full h-9 px-2.5 text-sm border border-stroke bg-card text-ink outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
           />
         </div>
 

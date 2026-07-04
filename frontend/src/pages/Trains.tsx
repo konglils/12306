@@ -4,6 +4,7 @@ import axios from 'axios'
 import type { Train } from '../types'
 import { useStations } from '../store/stations'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 
 export default function Trains() {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -42,13 +43,12 @@ export default function Trains() {
         <div className="flex gap-2.5 items-end">
           <div className="flex-1 min-w-0">
             <label className="block text-xs font-semibold text-muted mb-1">车次号</label>
-            <input
+            <Input
               type="text"
               value={inputCode}
               onChange={e => setInputCode(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && lookup()}
               placeholder="例如: G40"
-              className="w-full h-9 px-2.5 text-sm border border-stroke bg-card text-ink outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
           </div>
           <Button onClick={() => lookup()}>

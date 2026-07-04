@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 
 export default function Signup() {
   const navigate = useNavigate()
@@ -43,34 +44,31 @@ export default function Signup() {
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div>
             <label className="block text-xs font-semibold text-muted mb-1">用户名</label>
-            <input
+            <Input
               type="text"
               value={username}
               onChange={e => setUsername(e.target.value)}
               placeholder="6-30 位字母、数字或下划线"
-              className="w-full h-9 px-2.5 text-sm border border-stroke bg-card text-ink outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
           </div>
 
           <div>
             <label className="block text-xs font-semibold text-muted mb-1">密码</label>
-            <input
+            <Input
               type="password"
               value={password}
               onChange={e => setPassword(e.target.value)}
               placeholder="6-30 位字母、数字或下划线"
-              className="w-full h-9 px-2.5 text-sm border border-stroke bg-card text-ink outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
           </div>
 
           <div>
             <label className="block text-xs font-semibold text-muted mb-1">确认密码</label>
-            <input
+            <Input
               type="password"
               value={confirm}
               onChange={e => setConfirm(e.target.value)}
               placeholder="请再次输入密码"
-              className="w-full h-9 px-2.5 text-sm border border-stroke bg-card text-ink outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
           </div>
 

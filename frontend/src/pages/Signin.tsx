@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { useAuth } from '../store/auth'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 
 export default function Signin() {
   const navigate = useNavigate()
@@ -38,21 +39,19 @@ export default function Signin() {
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div>
             <label className="block text-xs font-semibold text-muted mb-1">用户名</label>
-            <input
+            <Input
               type="text"
               value={username}
               onChange={e => setUsername(e.target.value)}
-              className="w-full h-9 px-2.5 text-sm border border-stroke bg-card text-ink outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
           </div>
 
           <div>
             <label className="block text-xs font-semibold text-muted mb-1">密码</label>
-            <input
+            <Input
               type="password"
               value={password}
               onChange={e => setPassword(e.target.value)}
-              className="w-full h-9 px-2.5 text-sm border border-stroke bg-card text-ink outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
           </div>
 

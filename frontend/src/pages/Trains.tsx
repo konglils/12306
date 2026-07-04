@@ -7,6 +7,14 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
 
 export default function Trains() {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -77,16 +85,16 @@ export default function Trains() {
             <span className="text-sm text-muted">{train.style}</span>
           </div>
 
-          <table className="w-full table-fixed">
-            <thead>
-              <tr className="text-xs text-muted">
-                <th className="font-normal pb-2 text-center align-middle">停靠站</th>
-                <th className="font-normal pb-2 text-center align-middle">到点</th>
-                <th className="font-normal pb-2 text-center align-middle">开点</th>
-                <th className="font-normal pb-2 text-center align-middle">停留</th>
-              </tr>
-            </thead>
-            <tbody>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>停靠站</TableHead>
+                <TableHead>到点</TableHead>
+                <TableHead>开点</TableHead>
+                <TableHead>停留</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {stops.map((s, i) => {
                 const isFirst = i === 0
                 const isLast = i === stops.length - 1
@@ -101,19 +109,18 @@ export default function Trains() {
                     })()
 
                 return (
-                  <tr key={s.telecode} className="border-t border-sep first:border-t-0">
-                    <td className="relative py-2.5 border-l-2 border-primary text-sm text-ink text-center align-middle
-                      before:absolute before:-left-[5px] before:top-[calc(50%-4px)] before:w-2 before:h-2 before:bg-primary">
+                  <TableRow key={s.telecode}>
+                    <TableCell>
                       {stations[s.telecode] || s.telecode}
-                    </td>
-                    <td className="py-2.5 text-sm text-ink text-center align-middle">{toPoint}</td>
-                    <td className="py-2.5 text-sm text-ink text-center align-middle">{fromPoint}</td>
-                    <td className="py-2.5 text-sm text-muted text-center align-middle">{dwell}</td>
-                  </tr>
+                    </TableCell>
+                    <TableCell>{toPoint}</TableCell>
+                    <TableCell>{fromPoint}</TableCell>
+                    <TableCell className="text-muted-foreground">{dwell}</TableCell>
+                  </TableRow>
                 )
               })}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
           </CardContent>
         </Card>
       )}

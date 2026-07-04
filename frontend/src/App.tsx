@@ -9,25 +9,10 @@ import NotFound from './pages/NotFound'
 import { useStations } from './store/stations'
 import { useAuth } from './store/auth'
 import { Button } from '@/components/ui/button'
-
-function NavLink({ to, children }: { to: string; children: React.ReactNode }) {
-  const location = useLocation()
-  const active = location.pathname === to
-  return (
-    <Link
-      to={to}
-      className={`flex items-center relative px-3.5 font-semibold text-sm no-underline
-        ${active ? 'text-foreground' : 'text-muted-foreground'}
-        after:absolute after:bottom-3 after:left-1/2 after:-translate-x-1/2 after:h-0.5 after:bg-foreground after:transition-all after:duration-150
-        ${active ? 'after:w-[60%]' : 'after:w-0'}
-        hover:text-foreground`}
-    >
-      {children}
-    </Link>
-  )
-}
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 export default function App() {
+  const location = useLocation()
   const fetchStations = useStations(s => s.fetch)
   const checkSession = useAuth(s => s.check)
   const username = useAuth(s => s.username)
@@ -47,10 +32,12 @@ export default function App() {
         <Link to="/" className="text-base font-bold whitespace-nowrap no-underline text-primary hover:text-primary/80">
           中国铁路客户服务中心
         </Link>
-        <nav className="flex items-stretch gap-0 font-semibold h-full">
-          <NavLink to="/tickets">车票</NavLink>
-          <NavLink to="/trains">时刻表</NavLink>
-        </nav>
+        <Tabs value={location.pathname} onValueChange={(v) => navigate(v)}>
+          <TabsList variant="line">
+            <TabsTrigger value="/tickets">车票</TabsTrigger>
+            <TabsTrigger value="/trains">时刻表</TabsTrigger>
+          </TabsList>
+        </Tabs>
         <div className="flex gap-2 ml-auto items-center">
           {username ? (
             <>

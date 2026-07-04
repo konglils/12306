@@ -8,6 +8,7 @@ import Signup from './pages/Signup'
 import NotFound from './pages/NotFound'
 import { useStations } from './store/stations'
 import { useAuth } from './store/auth'
+import { Button } from '@/components/ui/button'
 
 function NavLink({ to, children }: { to: string; children: React.ReactNode }) {
   const location = useLocation()
@@ -54,27 +55,18 @@ export default function App() {
           {username ? (
             <>
               <span className="text-sm font-semibold text-ink">{username}</span>
-              <button
-                onClick={handleSignout}
-                className="px-4 py-2 border text-sm font-semibold cursor-pointer text-primary border-primary transition-all hover:bg-primary hover:text-white"
-              >
-                登 出
-              </button>
+              <Button type="button" onClick={handleSignout}>
+                登出
+              </Button>
             </>
           ) : (
             <>
-              <Link
-                to="/signin"
-                className="px-4 py-2 border text-sm font-semibold no-underline text-primary border-primary transition-all hover:bg-primary hover:text-white"
-              >
-                登 录
-              </Link>
-              <Link
-                to="/signup"
-                className="px-4 py-2 border text-sm font-semibold no-underline bg-primary text-white border-primary transition-all hover:bg-white hover:text-primary"
-              >
-                注 册
-              </Link>
+              <Button variant="outline" asChild>
+                <Link to="/signin">登录</Link>
+              </Button>
+              <Button asChild>
+                <Link to="/signup">注册</Link>
+              </Button>
             </>
           )}
         </div>

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { useAuth } from '../store/auth'
+import { Button } from '@/components/ui/button'
 
 export default function Signin() {
   const navigate = useNavigate()
@@ -59,13 +60,9 @@ export default function Signin() {
             <p className="text-sm text-accent">{error}</p>
           )}
 
-          <button
-            type="submit"
-            disabled={submitting}
-            className="h-9 border border-primary bg-primary text-white font-bold text-sm cursor-pointer hover:bg-primary-hi hover:border-primary-hi disabled:opacity-50"
-          >
-            {submitting ? '登录中...' : '登 录'}
-          </button>
+          <Button type="submit" disabled={submitting}>
+            {submitting ? '登录中...' : '登录'}
+          </Button>
         </form>
 
         <p className="text-sm text-muted mt-4 text-center">

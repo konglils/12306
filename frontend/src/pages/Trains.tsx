@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom'
 import axios from 'axios'
 import type { Train } from '../types'
 import { useStations } from '../store/stations'
+import { Button } from '@/components/ui/button'
 
 export default function Trains() {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -50,13 +51,9 @@ export default function Trains() {
               className="w-full h-9 px-2.5 text-sm border border-stroke bg-card text-ink outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
           </div>
-          <button
-            type="button"
-            onClick={() => lookup()}
-            className="h-9 px-6 border border-primary bg-primary text-white font-bold text-sm cursor-pointer whitespace-nowrap hover:bg-primary-hi hover:border-primary-hi"
-          >
-            查 询
-          </button>
+          <Button onClick={() => lookup()}>
+            查询
+          </Button>
         </div>
       </section>
 

@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
 import { useStations } from '../store/stations'
+import { Button } from '@/components/ui/button'
 
 interface Props {
   fromCode?: string
@@ -126,14 +127,14 @@ export default function TicketSearch({ fromCode, toCode, date, onSearch }: Props
           )}
         </div>
 
-        <button
-          type="button"
+        <Button
+          variant="outline"
+          size="icon"
           onClick={swap}
-          className="w-9 h-9 border border-stroke bg-card text-primary cursor-pointer flex items-center justify-center shrink-0 hover:bg-primary hover:text-white hover:border-primary"
           title="交换出发到达站"
         >
           ⇄
-        </button>
+        </Button>
 
         <div ref={toRef} className="relative">
           <label className="block text-xs font-semibold text-muted mb-1">到达站</label>
@@ -172,13 +173,11 @@ export default function TicketSearch({ fromCode, toCode, date, onSearch }: Props
           />
         </div>
 
-        <button
-          type="button"
+        <Button
           onClick={search}
-          className="h-9 px-6 border border-primary bg-primary text-white font-bold text-sm cursor-pointer whitespace-nowrap hover:bg-primary-hi hover:border-primary-hi"
         >
-          查 询
-        </button>
+          查询
+        </Button>
       </div>
     </section>
   )

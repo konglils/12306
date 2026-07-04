@@ -115,7 +115,7 @@ export default function Trains() {
                     </TableCell>
                     <TableCell>{toPoint}</TableCell>
                     <TableCell>{fromPoint}</TableCell>
-                    <TableCell className="text-muted-foreground-foreground">{dwell}</TableCell>
+                    <TableCell className="text-muted-foreground">{dwell}</TableCell>
                   </TableRow>
                 )
               })}

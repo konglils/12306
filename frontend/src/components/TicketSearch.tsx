@@ -1,12 +1,13 @@
 import { useState } from 'react'
-import { Check, ChevronsUpDown } from 'lucide-react'
+import { format } from 'date-fns'
+import { CalendarIcon, Check, ChevronsUpDown } from 'lucide-react'
 import { useStations } from '../store/stations'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent } from '@/components/ui/card'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem, CommandShortcut } from '@/components/ui/command'
+import { Calendar } from '@/components/ui/calendar'
 
 interface Props {
   fromCode?: string
@@ -20,7 +21,7 @@ export default function TicketSearch({ fromCode, toCode, date, onSearch }: Props
 
   const [from, setFrom] = useState(fromCode || '')
   const [to, setTo] = useState(toCode || '')
-  const [dateInput, setDateInput] = useState(() => date || '2026-07-05')
+  const [selectedDate, setSelectedDate] = useState(() => date ? new Date(date + 'T00:00:00') : new Date('2026-07-05'))
 
   const [fromOpen, setFromOpen] = useState(false)
   const [toOpen, setToOpen] = useState(false)
@@ -34,7 +35,7 @@ export default function TicketSearch({ fromCode, toCode, date, onSearch }: Props
   }
 
   function search() {
-    onSearch(from, to, dateInput)
+    onSearch(from, to, format(selectedDate, 'yyyy-MM-dd'))
   }
 
   return (
@@ -119,11 +120,21 @@ export default function TicketSearch({ fromCode, toCode, date, onSearch }: Props
 
         <div>
           <Label>出发日期</Label>
-          <Input
-            type="date"
-            value={dateInput}
-            onChange={e => setDateInput(e.target.value)}
-          />
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" className="w-full justify-start">
+                <CalendarIcon className="size-4 mr-1" />
+                {format(selectedDate, 'yyyy-MM-dd')}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0">
+              <Calendar
+                mode="single"
+                selected={selectedDate}
+                onSelect={(d) => d && setSelectedDate(d)}
+              />
+            </PopoverContent>
+          </Popover>
         </div>
 
         <Button onClick={search}>查询</Button>

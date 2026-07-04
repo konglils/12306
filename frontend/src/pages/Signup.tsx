@@ -1,95 +1,11 @@
-import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import axios from 'axios'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { SignupForm } from '@/components/signup-form'
 
 export default function Signup() {
-  const navigate = useNavigate()
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
-  const [confirm, setConfirm] = useState('')
-  const [error, setError] = useState('')
-  const [submitting, setSubmitting] = useState(false)
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    setError('')
-
-    if (password !== confirm) {
-      setError('两次输入的密码不一致')
-      return
-    }
-
-    setSubmitting(true)
-    try {
-      await axios.post('/api/users', { username, password })
-      navigate('/signin')
-    } catch (err) {
-      if (axios.isAxiosError(err) && err.response) {
-        setError(err.response.data.message || '注册失败')
-      } else {
-        setError('网络错误，请稍后重试')
-      }
-    } finally {
-      setSubmitting(false)
-    }
-  }
-
   return (
-    <div className="max-w-sm mx-auto">
-      <Card>
-        <CardHeader>
-          <CardTitle>注册</CardTitle>
-        </CardHeader>
-        <CardContent>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <div>
-            <Label>用户名</Label>
-            <Input
-              type="text"
-              value={username}
-              onChange={e => setUsername(e.target.value)}
-              placeholder="6-30 位字母、数字或下划线"
-            />
-          </div>
-
-          <div>
-            <Label>密码</Label>
-            <Input
-              type="password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              placeholder="6-30 位字母、数字或下划线"
-            />
-          </div>
-
-          <div>
-            <Label>确认密码</Label>
-            <Input
-              type="password"
-              value={confirm}
-              onChange={e => setConfirm(e.target.value)}
-              placeholder="请再次输入密码"
-            />
-          </div>
-
-          {error && (
-            <p className="text-sm text-destructive">{error}</p>
-          )}
-
-          <Button type="submit" disabled={submitting}>
-            {submitting ? '注册中...' : '注册'}
-          </Button>
-        </form>
-
-        <p className="text-sm text-muted-foreground mt-4 text-center">
-          已有账号？<Link to="/signin" className="text-primary hover:text-primary/80">去登录</Link>
-        </p>
-        </CardContent>
-      </Card>
+    <div className="flex w-full items-center justify-center p-6 md:p-10">
+      <div className="w-full max-w-sm">
+        <SignupForm />
+      </div>
     </div>
   )
 }

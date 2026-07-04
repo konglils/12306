@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { format } from 'date-fns'
 import { ArrowLeftRight, CalendarIcon, Check, ChevronsUpDown } from 'lucide-react'
 import { useStations } from '../store/stations'
@@ -25,8 +25,13 @@ export default function TicketSearch({ fromCode, toCode, date, onSearch }: Props
 
   const [fromOpen, setFromOpen] = useState(false)
   const [toOpen, setToOpen] = useState(false)
+  const [fromSearch, setFromSearch] = useState('')
+  const [toSearch, setToSearch] = useState('')
 
-  const stationList = Object.entries(stations).sort((a, b) => a[1].localeCompare(b[1], 'zh'))
+  const stationList = useMemo(
+    () => Object.entries(stations).sort((a, b) => a[1].localeCompare(b[1], 'zh')),
+    [stations],
+  )
 
   function swap() {
     const tmp = from
@@ -53,25 +58,31 @@ export default function TicketSearch({ fromCode, toCode, date, onSearch }: Props
             </PopoverTrigger>
             <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
               <Command>
-                <CommandInput placeholder="搜索车站..." />
+                <CommandInput placeholder="搜索车站..." onValueChange={setFromSearch} />
                 <CommandList>
-                  <CommandEmpty>未找到车站</CommandEmpty>
-                  <CommandGroup>
-                    {stationList.map(([code, name]) => (
-                      <CommandItem
-                        key={code}
-                        value={name}
-                        onSelect={() => {
-                          setFrom(code)
-                          setFromOpen(false)
-                        }}
-                      >
-                        {from === code && <Check className="size-4 shrink-0" />}
-                        {name}
-                        <CommandShortcut>{code}</CommandShortcut>
-                      </CommandItem>
-                    ))}
-                  </CommandGroup>
+                  <CommandEmpty></CommandEmpty>
+                  {fromSearch && (
+                    <CommandGroup>
+                      {stationList
+                        .filter(([code, name]) => name.includes(fromSearch) || code.includes(fromSearch.toUpperCase()))
+                        .slice(0, 100)
+                        .map(([code, name]) => (
+                          <CommandItem
+                            key={code}
+                            value={name}
+                            onSelect={() => {
+                              setFrom(code)
+                              setFromOpen(false)
+                              setFromSearch('')
+                            }}
+                          >
+                            {from === code && <Check className="size-4 shrink-0" />}
+                            {name}
+                            <CommandShortcut>{code}</CommandShortcut>
+                          </CommandItem>
+                        ))}
+                    </CommandGroup>
+                  )}
                 </CommandList>
               </Command>
             </PopoverContent>
@@ -93,25 +104,31 @@ export default function TicketSearch({ fromCode, toCode, date, onSearch }: Props
             </PopoverTrigger>
             <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
               <Command>
-                <CommandInput placeholder="搜索车站..." />
+                <CommandInput placeholder="搜索车站..." onValueChange={setToSearch} />
                 <CommandList>
-                  <CommandEmpty>未找到车站</CommandEmpty>
-                  <CommandGroup>
-                    {stationList.map(([code, name]) => (
-                      <CommandItem
-                        key={code}
-                        value={name}
-                        onSelect={() => {
-                          setTo(code)
-                          setToOpen(false)
-                        }}
-                      >
-                        {to === code && <Check className="size-4 shrink-0" />}
-                        {name}
-                        <CommandShortcut>{code}</CommandShortcut>
-                      </CommandItem>
-                    ))}
-                  </CommandGroup>
+                  <CommandEmpty></CommandEmpty>
+                  {toSearch && (
+                    <CommandGroup>
+                      {stationList
+                        .filter(([code, name]) => name.includes(toSearch) || code.includes(toSearch.toUpperCase()))
+                        .slice(0, 100)
+                        .map(([code, name]) => (
+                          <CommandItem
+                            key={code}
+                            value={name}
+                            onSelect={() => {
+                              setTo(code)
+                              setToOpen(false)
+                              setToSearch('')
+                            }}
+                          >
+                            {to === code && <Check className="size-4 shrink-0" />}
+                            {name}
+                            <CommandShortcut>{code}</CommandShortcut>
+                          </CommandItem>
+                        ))}
+                    </CommandGroup>
+                  )}
                 </CommandList>
               </Command>
             </PopoverContent>

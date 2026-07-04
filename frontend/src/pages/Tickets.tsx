@@ -55,19 +55,19 @@ export default function Tickets() {
       />
 
       {loading && (
-        <div className="text-center py-12 text-muted">查询中...</div>
+        <div className="text-center py-12 text-muted-foreground">查询中...</div>
       )}
 
       {!loading && hasParams && (
         <section>
           <div className="flex items-baseline mb-3">
-            <span className="text-base font-bold text-ink">
-              {fromName} <span className="text-gold mx-[0.3em]">—</span> {toName}
+            <span className="text-base font-bold text-foreground">
+              {fromName} <span className="text-muted-foreground mx-[0.3em]">—</span> {toName}
             </span>
-            <span className="text-sm text-muted ml-2.5">
+            <span className="text-sm text-muted-foreground ml-2.5">
               {formatDate(date)}
             </span>
-            <span className="text-xs text-muted ml-auto">
+            <span className="text-xs text-muted-foreground ml-auto">
               共计 <span className="text-primary font-semibold">{tickets.length}</span> 个车次
             </span>
           </div>
@@ -82,7 +82,7 @@ export default function Tickets() {
                 <span className="text-base font-semibold">
                   {t.startTime} — {t.arriveTime}
                   {t.arriveDay > 0 && (
-                    <sup className="text-sm text-gold">+{t.arriveDay}</sup>
+                    <sup className="text-sm text-muted-foreground">+{t.arriveDay}</sup>
                   )}
                 </span>
               </div>
@@ -93,9 +93,9 @@ export default function Tickets() {
                   style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))' }}
                 >
                   {t.seats.map(s => (
-                    <div key={s.type} className="flex justify-between items-baseline border-t border-dotted border-sep first:border-t-0">
-                      <span className="text-xs text-muted">{s.type}</span>
-                      <span className="font-bold text-base text-ink">
+                    <div key={s.type} className="flex justify-between items-baseline border-t border-dotted border-border first:border-t-0">
+                      <span className="text-xs text-muted-foreground">{s.type}</span>
+                      <span className="font-bold text-base text-foreground">
                         <span className="text-xs mr-px">¥</span>
                         {formatPrice(s.price / 10)}
                       </span>

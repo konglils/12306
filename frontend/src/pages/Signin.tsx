@@ -68,8 +68,8 @@ export default function Signin() {
           </Button>
         </form>
 
-        <p className="text-sm text-muted mt-4 text-center">
-          没有账号？<Link to="/signup" className="text-primary hover:text-primary-hi">去注册</Link>
+        <p className="text-sm text-muted-foreground mt-4 text-center">
+          没有账号？<Link to="/signup" className="text-primary hover:text-primary/80">去注册</Link>
         </p>
         </CardContent>
       </Card>

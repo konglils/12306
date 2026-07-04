@@ -70,19 +70,19 @@ export default function Trains() {
       </Card>
 
       {loading && (
-        <div className="text-center py-12 text-muted">查询中...</div>
+        <div className="text-center py-12 text-muted-foreground">查询中...</div>
       )}
 
       {error && !loading && (
-        <div className="text-center py-12 text-muted">{error}</div>
+        <div className="text-center py-12 text-muted-foreground">{error}</div>
       )}
 
       {!loading && train && (
         <Card>
           <CardContent>
           <div className="flex items-baseline gap-3 mb-4">
-            <h2 className="text-xl font-extrabold text-ink">{train.trainCodes}</h2>
-            <span className="text-sm text-muted">{train.style}</span>
+            <h2 className="text-xl font-extrabold text-foreground">{train.trainCodes}</h2>
+            <span className="text-sm text-muted-foreground">{train.style}</span>
           </div>
 
           <Table>
@@ -115,7 +115,7 @@ export default function Trains() {
                     </TableCell>
                     <TableCell>{toPoint}</TableCell>
                     <TableCell>{fromPoint}</TableCell>
-                    <TableCell className="text-muted-foreground">{dwell}</TableCell>
+                    <TableCell className="text-muted-foreground-foreground">{dwell}</TableCell>
                   </TableRow>
                 )
               })}

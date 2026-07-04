@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom'
 import axios from 'axios'
 import type { Train } from '../types'
 import { useStations } from '../store/stations'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -40,7 +41,8 @@ export default function Trains() {
 
   return (
     <div>
-      <section className="bg-card border border-stroke px-6 py-5 mb-5">
+      <Card>
+        <CardContent>
         <div className="flex gap-2.5 items-end">
           <div className="flex-1 min-w-0">
             <Label>车次号</Label>
@@ -56,7 +58,8 @@ export default function Trains() {
             查询
           </Button>
         </div>
-      </section>
+        </CardContent>
+      </Card>
 
       {loading && (
         <div className="text-center py-12 text-muted">查询中...</div>
@@ -67,7 +70,8 @@ export default function Trains() {
       )}
 
       {!loading && train && (
-        <section className="bg-card border border-stroke p-6">
+        <Card>
+          <CardContent>
           <div className="flex items-baseline gap-3 mb-4">
             <h2 className="text-xl font-extrabold text-ink">{train.trainCodes}</h2>
             <span className="text-sm text-muted">{train.style}</span>
@@ -110,7 +114,8 @@ export default function Trains() {
               })}
             </tbody>
           </table>
-        </section>
+          </CardContent>
+        </Card>
       )}
     </div>
   )

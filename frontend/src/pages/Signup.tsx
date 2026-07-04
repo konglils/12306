@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 
@@ -39,9 +40,11 @@ export default function Signup() {
 
   return (
     <div className="max-w-sm mx-auto">
-      <section className="bg-card border border-stroke px-8 py-8">
-        <h1 className="text-xl font-bold text-ink mb-6 text-center">注册</h1>
-
+      <Card>
+        <CardHeader>
+          <CardTitle>注册</CardTitle>
+        </CardHeader>
+        <CardContent>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div>
             <Label>用户名</Label>
@@ -85,7 +88,8 @@ export default function Signup() {
         <p className="text-sm text-muted mt-4 text-center">
           已有账号？<Link to="/signin" className="text-primary hover:text-primary-hi">去登录</Link>
         </p>
-      </section>
+        </CardContent>
+      </Card>
     </div>
   )
 }

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import axios from 'axios'
 import TicketSearch from '../components/TicketSearch'
+import { Card, CardContent } from '@/components/ui/card'
 import { useStations } from '../store/stations'
 import type { Ticket } from '../types'
 
@@ -72,7 +73,7 @@ export default function Tickets() {
           </div>
 
           {tickets.map(t => (
-            <article key={t.trainCode} className="bg-card border border-stroke mb-3 last:mb-0">
+            <Card key={t.trainCode} size="sm">
               <div
                 className="grid items-center gap-x-3 px-4 py-2.5 bg-primary text-white"
                 style={{ gridTemplateColumns: '4rem 1fr auto' }}
@@ -86,21 +87,23 @@ export default function Tickets() {
                 </span>
               </div>
 
-              <div
-                className="px-4 py-2 grid gap-x-16 gap-y-2"
-                style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))' }}
-              >
-                {t.seats.map(s => (
-                  <div key={s.type} className="flex justify-between items-baseline border-t border-dotted border-sep first:border-t-0">
-                    <span className="text-xs text-muted">{s.type}</span>
-                    <span className="font-bold text-base text-ink">
-                      <span className="text-xs mr-px">¥</span>
-                      {formatPrice(s.price / 10)}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </article>
+              <CardContent>
+                <div
+                  className="grid gap-x-16 gap-y-2"
+                  style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))' }}
+                >
+                  {t.seats.map(s => (
+                    <div key={s.type} className="flex justify-between items-baseline border-t border-dotted border-sep first:border-t-0">
+                      <span className="text-xs text-muted">{s.type}</span>
+                      <span className="font-bold text-base text-ink">
+                        <span className="text-xs mr-px">¥</span>
+                        {formatPrice(s.price / 10)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
           ))}
         </section>
       )}

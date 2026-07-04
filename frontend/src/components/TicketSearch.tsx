@@ -3,6 +3,7 @@ import { useStations } from '../store/stations'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Card, CardContent } from '@/components/ui/card'
 
 interface Props {
   fromCode?: string
@@ -100,7 +101,8 @@ export default function TicketSearch({ fromCode, toCode, date, onSearch }: Props
   }
 
   return (
-    <section className="bg-card border border-stroke px-6 py-5 mb-5">
+    <Card>
+      <CardContent>
       <div className="grid gap-2.5 items-end" style={{ gridTemplateColumns: '1fr auto 1fr 0.7fr auto' }}>
         <div ref={fromRef} className="relative">
           <Label>出发站</Label>
@@ -178,6 +180,7 @@ export default function TicketSearch({ fromCode, toCode, date, onSearch }: Props
           查询
         </Button>
       </div>
-    </section>
+      </CardContent>
+    </Card>
   )
 }

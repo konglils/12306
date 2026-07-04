@@ -42,7 +42,7 @@ export default function TicketSearch({ fromCode, toCode, date, onSearch }: Props
     <Card>
       <CardContent>
       <div className="grid gap-2.5 items-end" style={{ gridTemplateColumns: '1fr auto 1fr 0.7fr auto' }}>
-        <div>
+        <div className="flex flex-col gap-3">
           <Label>出发站</Label>
           <Popover open={fromOpen} onOpenChange={setFromOpen}>
             <PopoverTrigger asChild>
@@ -82,7 +82,7 @@ export default function TicketSearch({ fromCode, toCode, date, onSearch }: Props
           <ArrowLeftRight className="size-4" />
         </Button>
 
-        <div>
+        <div className="flex flex-col gap-3">
           <Label>到达站</Label>
           <Popover open={toOpen} onOpenChange={setToOpen}>
             <PopoverTrigger asChild>
@@ -118,7 +118,7 @@ export default function TicketSearch({ fromCode, toCode, date, onSearch }: Props
           </Popover>
         </div>
 
-        <div>
+        <div className="flex flex-col gap-3">
           <Label>出发日期</Label>
           <Popover>
             <PopoverTrigger asChild>

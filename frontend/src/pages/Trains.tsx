@@ -51,8 +51,8 @@ export default function Trains() {
     <div>
       <Card>
         <CardContent>
-        <div className="flex gap-2.5 items-end">
-          <div className="flex-1 min-w-0">
+        <div className="flex gap-3 items-end">
+          <div className="flex-1 min-w-0 flex flex-col gap-3">
             <Label>车次号</Label>
             <Input
               type="text"

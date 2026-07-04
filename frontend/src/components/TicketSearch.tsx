@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { format } from 'date-fns'
-import { CalendarIcon, Check, ChevronsUpDown } from 'lucide-react'
+import { ArrowLeftRight, CalendarIcon, Check, ChevronsUpDown } from 'lucide-react'
 import { useStations } from '../store/stations'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
@@ -79,7 +79,7 @@ export default function TicketSearch({ fromCode, toCode, date, onSearch }: Props
         </div>
 
         <Button variant="outline" size="icon" onClick={swap} title="交换出发到达站">
-          ⇄
+          <ArrowLeftRight className="size-4" />
         </Button>
 
         <div>

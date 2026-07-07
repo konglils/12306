@@ -1,8 +1,20 @@
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import axios from 'axios'
-import type { Train } from '../types'
-import { useStations } from '../store/stations'
+import type { Train } from '@/types'
+import { useStations } from '@/store/stations'
+import { Card, CardContent } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
 
 export default function Trains() {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -37,54 +49,52 @@ export default function Trains() {
 
   return (
     <div>
-      <section className="bg-card border border-stroke px-6 py-5 mb-5">
-        <div className="flex gap-2.5 items-end">
-          <div className="flex-1 min-w-0">
-            <label className="block text-xs font-semibold text-muted mb-1">车次号</label>
-            <input
+      <Card>
+        <CardContent>
+        <div className="flex gap-3 items-end">
+          <div className="flex-1 min-w-0 flex flex-col gap-3">
+            <Label>车次号</Label>
+            <Input
               type="text"
               value={inputCode}
               onChange={e => setInputCode(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && lookup()}
               placeholder="例如: G40"
-              className="w-full h-9 px-2.5 text-sm border border-stroke bg-card text-ink outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
           </div>
-          <button
-            type="button"
-            onClick={() => lookup()}
-            className="h-9 px-6 border border-primary bg-primary text-white font-bold text-sm cursor-pointer whitespace-nowrap hover:bg-primary-hi hover:border-primary-hi"
-          >
-            查 询
-          </button>
+          <Button onClick={() => lookup()}>
+            查询
+          </Button>
         </div>
-      </section>
+        </CardContent>
+      </Card>
 
       {loading && (
-        <div className="text-center py-12 text-muted">查询中...</div>
+        <div className="text-center py-12 text-muted-foreground">查询中...</div>
       )}
 
       {error && !loading && (
-        <div className="text-center py-12 text-muted">{error}</div>
+        <div className="text-center py-12 text-muted-foreground">{error}</div>
       )}
 
       {!loading && train && (
-        <section className="bg-card border border-stroke p-6">
+        <Card>
+          <CardContent>
           <div className="flex items-baseline gap-3 mb-4">
-            <h2 className="text-xl font-extrabold text-ink">{train.trainCodes}</h2>
-            <span className="text-sm text-muted">{train.style}</span>
+            <h2 className="text-xl font-extrabold text-foreground">{train.trainCodes}</h2>
+            <span className="text-sm text-muted-foreground">{train.style}</span>
           </div>
 
-          <table className="w-full table-fixed">
-            <thead>
-              <tr className="text-xs text-muted">
-                <th className="font-normal pb-2 text-center align-middle">停靠站</th>
-                <th className="font-normal pb-2 text-center align-middle">到点</th>
-                <th className="font-normal pb-2 text-center align-middle">开点</th>
-                <th className="font-normal pb-2 text-center align-middle">停留</th>
-              </tr>
-            </thead>
-            <tbody>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>停靠站</TableHead>
+                <TableHead>到点</TableHead>
+                <TableHead>开点</TableHead>
+                <TableHead>停留</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {stops.map((s, i) => {
                 const isFirst = i === 0
                 const isLast = i === stops.length - 1
@@ -99,20 +109,20 @@ export default function Trains() {
                     })()
 
                 return (
-                  <tr key={s.telecode} className="border-t border-sep first:border-t-0">
-                    <td className="relative py-2.5 border-l-2 border-primary text-sm text-ink text-center align-middle
-                      before:absolute before:-left-[5px] before:top-[calc(50%-4px)] before:w-2 before:h-2 before:bg-primary">
+                  <TableRow key={s.telecode}>
+                    <TableCell>
                       {stations[s.telecode] || s.telecode}
-                    </td>
-                    <td className="py-2.5 text-sm text-ink text-center align-middle">{toPoint}</td>
-                    <td className="py-2.5 text-sm text-ink text-center align-middle">{fromPoint}</td>
-                    <td className="py-2.5 text-sm text-muted text-center align-middle">{dwell}</td>
-                  </tr>
+                    </TableCell>
+                    <TableCell>{toPoint}</TableCell>
+                    <TableCell>{fromPoint}</TableCell>
+                    <TableCell>{dwell}</TableCell>
+                  </TableRow>
                 )
               })}
-            </tbody>
-          </table>
-        </section>
+            </TableBody>
+          </Table>
+          </CardContent>
+        </Card>
       )}
     </div>
   )

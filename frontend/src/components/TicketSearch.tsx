@@ -21,7 +21,7 @@ export default function TicketSearch({ fromCode, toCode, date, onSearch }: Props
 
   const [from, setFrom] = useState(fromCode || '')
   const [to, setTo] = useState(toCode || '')
-  const [selectedDate, setSelectedDate] = useState(() => date ? new Date(date + 'T00:00:00') : new Date('2026-07-05'))
+  const [selectedDate, setSelectedDate] = useState(() => date ? new Date(date + 'T00:00:00') : new Date())
 
   const [fromOpen, setFromOpen] = useState(false)
   const [toOpen, setToOpen] = useState(false)

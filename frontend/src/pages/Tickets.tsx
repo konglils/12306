@@ -4,8 +4,8 @@ import axios from 'axios'
 import TicketSearch from '@/components/TicketSearch'
 import TicketCard from '@/components/TicketCard'
 import { Loader2, MoveRight } from 'lucide-react'
-import { useStations } from '../store/stations'
-import type { Ticket } from '../types'
+import { useStations } from '@/store/stations'
+import type { Ticket } from '@/types'
 
 function formatDate(d: string): string {
   if (!d) return ''

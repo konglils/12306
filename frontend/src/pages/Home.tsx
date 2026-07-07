@@ -1,5 +1,5 @@
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import TicketSearch from '../components/TicketSearch'
+import TicketSearch from '@/components/TicketSearch'
 
 export default function Home() {
   const [searchParams] = useSearchParams()

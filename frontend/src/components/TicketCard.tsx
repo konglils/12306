@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { ChevronDown, ChevronUp } from 'lucide-react'
-import type { Ticket } from '../types'
+import type { Ticket } from '@/types'
 
 function formatPrice(price: number): string {
   return String(price).replace(/\B(?=(\d{3})+(?!\d))/g, ',')

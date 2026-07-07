@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react'
 import { format } from 'date-fns'
 import { ArrowLeftRight, CalendarIcon, Check, ChevronsUpDown } from 'lucide-react'
-import { useStations } from '../store/stations'
+import { useStations } from '@/store/stations'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent } from '@/components/ui/card'

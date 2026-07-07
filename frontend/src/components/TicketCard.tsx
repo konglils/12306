@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { ChevronDown, ChevronUp } from 'lucide-react'
@@ -41,12 +42,16 @@ export default function TicketCard({ ticket: t, fromName, toName }: Props) {
               <div className="text-xl font-bold tracking-tight">{t.startTime}</div>
               <div className="text-sm text-foreground mt-0.5">{fromName}</div>
             </div>
-            <div className="text-center">
-              <div className="font-bold text-lg">{t.trainCode}</div>
-              <div className="text-xs text-foreground mt-0.5">
+            <Link
+              to={`/trains?code=${t.trainCode}`}
+              className="text-center no-underline hover:underline underline-offset-2"
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="font-bold text-lg text-foreground">{t.trainCode}</div>
+              <div className="text-xs text-muted-foreground mt-0.5 underline-offset-2">
                 {calcDuration(t.startTime, t.arriveTime, t.arriveDay)}
               </div>
-            </div>
+            </Link>
             <div className="text-center">
               <div className="text-xl font-bold tracking-tight">{t.arriveTime}</div>
               <div className="text-sm text-foreground mt-0.5">{toName}</div>

@@ -1,4 +1,4 @@
-name: "12306"
+name: "rail12306"
 
 services:
   mysql:
@@ -6,8 +6,8 @@ services:
     ports:
       - "3306:3306"
     environment:
-      MYSQL_ROOT_PASSWORD: root123
-      MYSQL_DATABASE: _12306
+      MYSQL_ROOT_PASSWORD: rail12306
+      MYSQL_DATABASE: rail12306
     volumes:
       - mysql_data:/var/lib/mysql
     command:

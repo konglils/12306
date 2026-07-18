@@ -1,11 +1,11 @@
 spring:
   application:
-    name: backend
+    name: rail12306
 
   datasource:
-    url: jdbc:mysql://localhost:3306/_12306
+    url: jdbc:mysql://localhost:3306/rail12306
     username: root
-    password: root123
+    password: rail12306
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   flyway:
@@ -14,4 +14,4 @@ spring:
 mybatis:
   configuration:
     map-underscore-to-camel-case: true
-  type-handlers-package: cn.nispring._12306.typehandler
+  type-handlers-package: cn.nispring.rail12306.typehandler

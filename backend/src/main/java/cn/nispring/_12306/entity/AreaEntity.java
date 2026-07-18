@@ -1,9 +1,7 @@
 package cn.nispring._12306.entity;
 
-public record StationEntity(
+public record AreaEntity(
         Long id,
-        Long areaId,
-        String telecode,
         String name
 ) {
 }

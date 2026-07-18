@@ -1,10 +1,20 @@
 package cn.nispring._12306.entity;
 
+import cn.nispring._12306.model.SeatType;
+
+import java.time.LocalDate;
+
 public record PriceEntity(
-        Long id,
+        LocalDate trainDate,
+        Long fromAreaId,
+        Long toAreaId,
+        Long trainId,
         Long fromStationId,
         Long toStationId,
-        Long trainId,
-        String priceRaw
+        Integer fromStopIdx,
+        Integer toStopIdx,
+        SeatType seatType,
+        Boolean hasSeat,
+        Integer price
 ) {
 }

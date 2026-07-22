@@ -1,7 +1,31 @@
 package cn.nispring.rail12306.entity;
 
-public record AreaEntity(
-        Long id,
-        String name
-) {
+public class AreaEntity {
+
+    private Long id;
+    private String name;
+
+    public AreaEntity() {
+    }
+
+    public AreaEntity(Long id, String name) {
+        this.id = id;
+        this.name = name;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 }

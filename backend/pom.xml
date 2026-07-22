@@ -9,10 +9,10 @@
         <relativePath/>
     </parent>
     <groupId>cn.nispring</groupId>
-    <artifactId>12306</artifactId>
+    <artifactId>rail12306</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>backend</name>
-    <description>backend</description>
+    <name>Rail 12306</name>
+    <description>A backend imitating 12306 railway ticket system, based on Spring Boot.</description>
     <url/>
     <licenses>
         <license/>
@@ -65,7 +65,7 @@
         <dependency>
             <groupId>org.mybatis.spring.boot</groupId>
             <artifactId>mybatis-spring-boot-starter</artifactId>
-            <version>4.0.0</version>
+            <version>4.0.1</version>
         </dependency>
 
         <!-- MySQL -->

@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: rail12306
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/rail12306
+    username: root
+    password: rail12306
+
+  flyway:
+    enabled: true
+
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true

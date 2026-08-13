@@ -15,6 +15,16 @@ public interface CarMapper {
     @Insert("INSERT INTO cars (style, code) VALUES (#{style}, #{code})")
     int insert(CarEntity car);
 
+    @Insert("""
+            <script>
+            INSERT INTO cars (id, style, code) VALUES
+            <foreach collection="list" item="car" separator=",">
+                (#{car.id}, #{car.style}, #{car.code})
+            </foreach>
+            </script>
+            """)
+    int insertBatch(List<CarEntity> cars);
+
     @Update("UPDATE cars SET style = #{style}, code = #{code} WHERE id = #{id}")
     int updateById(CarEntity car);
 

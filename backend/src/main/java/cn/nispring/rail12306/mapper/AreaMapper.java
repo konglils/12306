@@ -28,6 +28,6 @@ public interface AreaMapper {
     @Update("UPDATE areas SET name = #{name} WHERE id = #{id}")
     void updateById(AreaEntity entity);
 
-    @Delete("DELETE FROM stations WHERE id = #{id}")
+    @Delete("DELETE FROM areas WHERE id = #{id}")
     void deleteById(Long id);
 }

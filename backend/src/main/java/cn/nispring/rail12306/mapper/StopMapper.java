@@ -4,6 +4,7 @@ import cn.nispring.rail12306.entity.AreaEntity;
 import cn.nispring.rail12306.entity.StopEntity;
 import org.apache.ibatis.annotations.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Mapper
@@ -23,4 +24,7 @@ public interface StopMapper {
             </script>
             """)
     int insertBatch(List<StopEntity> stops);
+
+    @Select("SELECT EXISTS(SELECT 1 FROM stops WHERE train_date = #{date})")
+    boolean existsByDate(LocalDate date);
 }

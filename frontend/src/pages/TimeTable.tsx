@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { format } from 'date-fns'
 import axios from 'axios'
+import { Info } from 'lucide-react'
 import type { TimeTableRow } from '@/types'
 import { useStations } from '@/store/stations'
 import { Card, CardContent } from '@/components/ui/card'
@@ -49,6 +50,10 @@ export default function TimeTable() {
   }
 
   const stops = rows ?? []
+  // Set 按插入顺序迭代，因此这里的顺序就是各车次号首次出现的顺序
+  const distinctCodes = rows ? Array.from(new Set(rows.map(r => r.trainCode))) : []
+  const trainCodes = distinctCodes.join('/')
+  const hasMultipleCodes = distinctCodes.length > 1
 
   return (
     <div>
@@ -84,7 +89,7 @@ export default function TimeTable() {
         <Card>
           <CardContent>
           <div className="flex items-baseline gap-3 mb-4">
-            <h2 className="text-xl font-extrabold text-foreground">{rows[0]?.trainCode}</h2>
+            <h2 className="text-xl font-extrabold text-foreground">{trainCodes}</h2>
           </div>
 
           <Table>
@@ -100,6 +105,8 @@ export default function TimeTable() {
               {stops.map((s, i) => {
                 const isFirst = i === 0
                 const isLast = i === stops.length - 1
+                const codeChanged = i > 0 && s.trainCode !== stops[i - 1].trainCode
+                const showStartHint = isFirst && hasMultipleCodes
                 const toPoint = isFirst ? '—' : (s.arriveTime ?? '—')
                 const fromPoint = isLast ? '—' : (s.startTime ?? '—')
                 const dwell = isFirst || isLast
@@ -113,14 +120,33 @@ export default function TimeTable() {
                       : '—')
 
                 return (
-                  <TableRow key={s.stationTelecode}>
-                    <TableCell>
-                      {stations[s.stationTelecode] || s.stationTelecode}
-                    </TableCell>
-                    <TableCell>{toPoint}</TableCell>
-                    <TableCell>{fromPoint}</TableCell>
-                    <TableCell>{dwell}</TableCell>
-                  </TableRow>
+                  <Fragment key={`${s.trainCode}-${s.stationTelecode}`}>
+                    {/* 始发提示或车次变更时去掉下边框，与下面的提示行之间无分割线 */}
+                    <TableRow className={codeChanged || showStartHint ? 'border-0' : undefined}>
+                      <TableCell>
+                        {stations[s.stationTelecode] || s.stationTelecode}
+                      </TableCell>
+                      <TableCell>{toPoint}</TableCell>
+                      <TableCell>{fromPoint}</TableCell>
+                      <TableCell>{dwell}</TableCell>
+                    </TableRow>
+                    {showStartHint && (
+                      <TableRow>
+                        <TableCell colSpan={4} className="text-muted-foreground">
+                          <Info className="size-4 inline mr-1" />
+                          本次列车自当前车站起车次号为 {s.trainCode}
+                        </TableCell>
+                      </TableRow>
+                    )}
+                    {codeChanged && (
+                      <TableRow>
+                        <TableCell colSpan={4} className="text-muted-foreground">
+                          <Info className="size-4 inline mr-1" />
+                          本次列车自当前车站起车次号变更为 {s.trainCode}
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </Fragment>
                 )
               })}
             </TableBody>

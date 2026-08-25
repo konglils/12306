@@ -12,15 +12,11 @@ export interface Ticket {
   seats: Seat[]
 }
 
-export interface Train {
-  trainCodes: string
-  style: string
-  stations: {
-    telecode: string
-    trainCode: string
-    arriveDay: number
-    arriveTime: string
-    startDay: number
-    startTime: string
-  }[]
+export interface TimeTableRow {
+  stationTelecode: string
+  trainCode: string
+  arriveDay: number | null
+  arriveTime: string | null
+  startDay: number | null
+  startTime: string | null
 }

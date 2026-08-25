@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
+import { format } from 'date-fns'
 import axios from 'axios'
-import type { Train } from '@/types'
+import type { TimeTableRow } from '@/types'
 import { useStations } from '@/store/stations'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -16,12 +17,12 @@ import {
   TableRow,
 } from '@/components/ui/table'
 
-export default function Trains() {
+export default function TimeTable() {
   const [searchParams, setSearchParams] = useSearchParams()
   const stations = useStations(s => s.stations)
 
   const [inputCode, setInputCode] = useState('')
-  const [train, setTrain] = useState<Train | null>(null)
+  const [rows, setRows] = useState<TimeTableRow[] | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -31,21 +32,23 @@ export default function Trains() {
       setInputCode(code)
       lookup(code)
     }
+    // 仅挂载时读取 URL 参数，页面内查询走 lookup
   }, [])
 
   function lookup(query?: string) {
     const c = (query || inputCode).toUpperCase()
     if (!c) return
-    setSearchParams({ code: c }, { replace: true })
+    const date = searchParams.get('date') || format(new Date(), 'yyyy-MM-dd')
+    setSearchParams({ code: c, date }, { replace: true })
     setError('')
     setLoading(true)
-    axios.get('/api/trains', { params: { code: c } })
-      .then(res => { setTrain(res.data); setError('') })
-      .catch(() => { setTrain(null); setError('未找到该车次') })
+    axios.get('/api/timetable', { params: { date, code: c } })
+      .then(res => { setRows(res.data); setError('') })
+      .catch(() => { setRows(null); setError('未找到该车次') })
       .finally(() => setLoading(false))
   }
 
-  const stops = train?.stations ?? []
+  const stops = rows ?? []
 
   return (
     <div>
@@ -59,7 +62,7 @@ export default function Trains() {
               value={inputCode}
               onChange={e => setInputCode(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && lookup()}
-              placeholder="例如: G40"
+              placeholder="例如: G1"
             />
           </div>
           <Button onClick={() => lookup()}>
@@ -77,12 +80,11 @@ export default function Trains() {
         <div className="text-center py-12 text-muted-foreground">{error}</div>
       )}
 
-      {!loading && train && (
+      {!loading && rows && (
         <Card>
           <CardContent>
           <div className="flex items-baseline gap-3 mb-4">
-            <h2 className="text-xl font-extrabold text-foreground">{train.trainCodes}</h2>
-            <span className="text-sm text-muted-foreground">{train.style}</span>
+            <h2 className="text-xl font-extrabold text-foreground">{rows[0]?.trainCode}</h2>
           </div>
 
           <Table>
@@ -98,20 +100,22 @@ export default function Trains() {
               {stops.map((s, i) => {
                 const isFirst = i === 0
                 const isLast = i === stops.length - 1
-                const toPoint = isFirst ? '—' : s.arriveTime
-                const fromPoint = isLast ? '—' : s.startTime
+                const toPoint = isFirst ? '—' : (s.arriveTime ?? '—')
+                const fromPoint = isLast ? '—' : (s.startTime ?? '—')
                 const dwell = isFirst || isLast
                   ? '—'
-                  : (() => {
-                      const [ah, am] = s.arriveTime.split(':').map(Number)
-                      const [sh, sm] = s.startTime.split(':').map(Number)
-                      return `${(sh * 60 + sm) - (ah * 60 + am)} 分`
-                    })()
+                  : (s.arriveTime && s.startTime
+                      ? (() => {
+                          const [ah, am] = s.arriveTime.split(':').map(Number)
+                          const [sh, sm] = s.startTime.split(':').map(Number)
+                          return `${(sh * 60 + sm) - (ah * 60 + am)} 分`
+                        })()
+                      : '—')
 
                 return (
-                  <TableRow key={s.telecode}>
+                  <TableRow key={s.stationTelecode}>
                     <TableCell>
-                      {stations[s.telecode] || s.telecode}
+                      {stations[s.stationTelecode] || s.stationTelecode}
                     </TableCell>
                     <TableCell>{toPoint}</TableCell>
                     <TableCell>{fromPoint}</TableCell>

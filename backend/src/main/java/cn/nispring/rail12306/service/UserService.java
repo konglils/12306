@@ -64,6 +64,15 @@ public class UserService {
         updateSessionToken(sessionToken, null, id);
     }
 
+    public User checkLoggedIn(String sessionToken) {
+        UserEntity entity = userMapper.selectBySessionToken(sessionToken);
+        if (entity == null) {
+            throw new BusinessException(HttpStatus.UNAUTHORIZED, "用户未登录");
+        } else {
+            return new User(entity.getId(), entity.getUsername());
+        }
+    }
+
     private String generateSessionToken() {
         byte[] token = new byte[32];
         secureRandom.nextBytes(token);

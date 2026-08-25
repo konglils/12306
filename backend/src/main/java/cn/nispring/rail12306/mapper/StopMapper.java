@@ -28,8 +28,8 @@ public interface StopMapper {
     @Select("SELECT EXISTS(SELECT 1 FROM stops WHERE train_date = #{date})")
     boolean existsByDate(LocalDate date);
 
-    @Select("SELECT train_id FROM stops WHERE train_code = #{code} LIMIT 1")
-    Long selectIdByCode(String code);
+    @Select("SELECT train_id FROM stops WHERE train_date = #{date} AND train_code = #{code} LIMIT 1")
+    Long selectIdByCode(LocalDate date, String code);
 
     @Select("""
 SELECT

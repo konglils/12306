@@ -24,7 +24,7 @@ public class TimeTableService {
     }
 
     public List<TimeTableRow> getTable(LocalDate date, String code) {
-        Long id = stopMapper.selectIdByCode(code);
+        Long id = stopMapper.selectIdByCode(date, code);
         List<StopEntity> entities = stopMapper.selectById(date, id);
         List<TimeTableRow> table = entities.stream().map(entity -> new TimeTableRow(
                 stationService.get(entity.getStationId()).telecode(),

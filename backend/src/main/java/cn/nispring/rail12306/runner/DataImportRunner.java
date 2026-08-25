@@ -27,8 +27,8 @@ import static cn.nispring.rail12306.util.Util.readCsv;
 
 /**
  * 读取 data.dir 下的 csv 文件并写入数据库
- * 通过 --data.import=true 启用, --data.dir 指定数据目录
- * 启动命令示例: ./mvnw spring-boot:run -Dspring-boot.run.arguments="--data.import=true"
+ * 通过 --data.imported=true 启用, --data.dir 指定数据目录
+ * 启动命令示例: ./mvnw spring-boot:run -Dspring-boot.run.arguments="--data.imported=true"
  */
 @Component
 @ConditionalOnProperty(prefix = "data", name = "imported", havingValue = "true")

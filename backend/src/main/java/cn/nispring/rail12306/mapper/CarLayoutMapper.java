@@ -1,7 +1,6 @@
 package cn.nispring.rail12306.mapper;
 
 import cn.nispring.rail12306.entity.CarLayoutEntity;
-import cn.nispring.rail12306.entity.StopEntity;
 import org.apache.ibatis.annotations.*;
 
 import java.time.LocalDate;

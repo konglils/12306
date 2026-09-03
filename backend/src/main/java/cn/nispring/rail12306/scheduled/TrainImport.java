@@ -6,7 +6,6 @@ import cn.nispring.rail12306.mapper.StopMapper;
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -20,24 +19,28 @@ import java.util.List;
 import static cn.nispring.rail12306.util.Util.readCsv;
 
 @Component
-public class StopImport {
+public class TrainImport {
 
-    private static final Logger log = LoggerFactory.getLogger(StopImport.class);
+    private static final Logger log = LoggerFactory.getLogger(TrainImport.class);
 
     private final StopMapper stopMapper;
     private final DataProperties dataProperties;
 
-    public StopImport(StopMapper stopMapper, DataProperties dataProperties) {
+    public TrainImport(StopMapper stopMapper, DataProperties dataProperties) {
         this.stopMapper = stopMapper;
         this.dataProperties = dataProperties;
     }
 
     /**
-     * 每天 12:00（北京时间）执行
+     * 每天 12:00（北京时间）和应用启动时执行
      */
     @Scheduled(cron = "0 0 12 * * *", zone = "Asia/Shanghai")
     @PostConstruct
-    public void importStop() throws IOException {
+    public void importTrain() throws IOException {
+        importStop();
+    }
+
+    private void importStop() throws IOException {
         stopMapper.deleteOld();
         log.info("delete old records for table stops");
 
@@ -68,14 +71,12 @@ public class StopImport {
 
         // 生成接下来15天的时刻
         LocalDate now = LocalDate.now();
-        int genCnt = 0;
         for (int i = 0; i < 15; i += 1) {
             LocalDate date = now.plusDays(i);
             if (stopMapper.existsByDate(date)) {
                 continue;
             }
 
-            genCnt += 1;
             for (StopEntity stop : stops) {
                 stop.setTrainDate(date);
             }
@@ -84,7 +85,7 @@ public class StopImport {
                 List<StopEntity> sub = stops.subList(j, Math.min(j + n, stops.size()));
                 stopMapper.insertBatch(sub);
             }
-            log.info("import records of {} for stops", date);
+            log.info("import records on {} for stops", date);
         }
     }
 }

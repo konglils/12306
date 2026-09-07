@@ -1,6 +1,5 @@
 package cn.nispring.rail12306.mapper;
 
-import cn.nispring.rail12306.entity.CarLayoutEntity;
 import cn.nispring.rail12306.entity.SeatEntity;
 import org.apache.ibatis.annotations.*;
 
@@ -28,7 +27,7 @@ public interface SeatMapper {
     @Select("SELECT EXISTS(SELECT 1 FROM seats WHERE train_date = #{date})")
     boolean existsByDate(LocalDate date);
 
-    @Select("SELECT (train_date, train_id, seat_type, segment_idx, graph)" +
+    @Select("SELECT train_date, train_id, seat_type, segment_idx, graph " +
             "FROM seats " +
             "WHERE train_date = #{date} AND train_id = #{trainId} AND seat_type = #{seatType} AND " +
             "segment_idx >= #{fromIdx} AND segment_idx <= #{toIdx}")

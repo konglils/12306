@@ -22,5 +22,5 @@ public interface UserMapper {
     int insert(UserEntity entity);
 
     @Update("UPDATE users SET session_token = #{sessionToken} WHERE id = #{id}")
-    int updateSessionToken(@Param("id") Long id, @Param("sessionToken") String sessionToken);
+    void updateSessionToken(@Param("id") Long id, @Param("sessionToken") String sessionToken);
 }

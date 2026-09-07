@@ -22,14 +22,14 @@ public interface CarLayoutMapper {
             </foreach>
             </script>
             """)
-    int insertBatch(List<CarLayoutEntity> entities);
+    void insertBatch(List<CarLayoutEntity> entities);
 
     @Select("SELECT EXISTS(SELECT 1 FROM car_layouts WHERE train_date = #{date})")
     boolean existsByDate(LocalDate date);
 
-    @Select("SELECT (train_date, train_id, car_id, layout) FROM car_layouts WHERE train_date = #{date} AND train_id = #{trainId}")
+    @Select("SELECT train_date, train_id, car_id, layout FROM car_layouts WHERE train_date = #{date} AND train_id = #{trainId}")
     CarLayoutEntity selectByTrainId(LocalDate date, Long trainId);
 
-    @Select("SELECT (train_date, train_id, car_id, layout) FROM car_layouts WHERE train_date = #{date} AND car_id = #{carId}")
+    @Select("SELECT train_date, train_id, car_id, layout FROM car_layouts WHERE train_date = #{date} AND car_id = #{carId}")
     List<CarLayoutEntity> selectByCarId(LocalDate date, Long carId);
 }

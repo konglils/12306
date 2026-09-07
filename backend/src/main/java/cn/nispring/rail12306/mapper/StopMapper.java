@@ -1,6 +1,5 @@
 package cn.nispring.rail12306.mapper;
 
-import cn.nispring.rail12306.entity.AreaEntity;
 import cn.nispring.rail12306.entity.StopEntity;
 import org.apache.ibatis.annotations.*;
 
@@ -23,7 +22,7 @@ public interface StopMapper {
             </foreach>
             </script>
             """)
-    int insertBatch(List<StopEntity> stops);
+    void insertBatch(List<StopEntity> stops);
 
     @Select("SELECT EXISTS(SELECT 1 FROM stops WHERE train_date = #{date})")
     boolean existsByDate(LocalDate date);
@@ -31,12 +30,10 @@ public interface StopMapper {
     @Select("SELECT train_id FROM stops WHERE train_date = #{date} AND train_code = #{code} LIMIT 1")
     Long selectIdByCode(LocalDate date, String code);
 
-    @Select("""
-SELECT
-train_date, train_id, stop_idx, station_id, train_code, arrive_day, arrive_time, start_day, start_time
-FROM stops
-WHERE train_date = #{date} AND train_id = #{id}
-ORDER BY stop_idx
-""")
+    @Select("SELECT " +
+            "train_date, train_id, stop_idx, station_id, train_code, arrive_day, arrive_time, start_day, start_time " +
+            "FROM stops " +
+            "WHERE train_date = #{date} AND train_id = #{id} " +
+            "ORDER BY stop_idx")
     List<StopEntity> selectById(LocalDate date, Long id);
 }

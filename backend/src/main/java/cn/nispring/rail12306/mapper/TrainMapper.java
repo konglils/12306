@@ -26,8 +26,8 @@ public interface TrainMapper {
     int insertBatch(List<TrainEntity> trains);
 
     @Update("UPDATE trains SET number = #{number} WHERE id = #{id}")
-    int updateById(TrainEntity train);
+    void updateById(TrainEntity train);
 
     @Delete("DELETE FROM trains WHERE id = #{id}")
-    int deleteById(Long id);
+    void deleteById(Long id);
 }

@@ -10,6 +10,10 @@ spring:
   flyway:
     enabled: true
 
+  mvc:
+    # 预期内、已被 GlobalExceptionHandler 正常处理的异常，不再由框架打 WARN
+    log-resolved-exception: false
+
 mybatis:
   type-handlers-package: cn.nispring.rail12306.typehandler
   configuration:

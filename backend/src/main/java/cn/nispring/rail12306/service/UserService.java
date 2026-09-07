@@ -67,7 +67,7 @@ public class UserService {
     public User checkLoggedIn(String sessionToken) {
         UserEntity entity = userMapper.selectBySessionToken(sessionToken);
         if (entity == null) {
-            throw new BusinessException(HttpStatus.UNAUTHORIZED, "用户未登录");
+            return null;
         } else {
             return new User(entity.getId(), entity.getUsername());
         }

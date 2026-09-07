@@ -12,7 +12,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 @MappedTypes(Layout.class)
-public class LayoutTypeHandler extends BaseTypeHandler<Layout> {
+public class LayoutHandler extends BaseTypeHandler<Layout> {
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
 

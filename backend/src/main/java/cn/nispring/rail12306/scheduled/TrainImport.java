@@ -108,7 +108,7 @@ public class TrainImport {
 
         // ======================================================================
 
-        stopMapper.deleteOld();
+        carLayoutMapper.deleteOld();
         log.info("delete old records for table car_layouts");
 
         Path jsonPath = dataProperties.getDir().resolve("layout_g.json");

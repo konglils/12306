@@ -33,7 +33,13 @@ public interface StopMapper {
     @Select("SELECT " +
             "train_date, train_id, stop_idx, station_id, train_code, arrive_day, arrive_time, start_day, start_time " +
             "FROM stops " +
-            "WHERE train_date = #{date} AND train_id = #{id} " +
+            "WHERE train_date = #{date} AND train_id = #{trainId} " +
             "ORDER BY stop_idx")
-    List<StopEntity> selectById(LocalDate date, Long id);
+    List<StopEntity> selectByTrainId(LocalDate date, Long trainId);
+
+    @Select("SELECT " +
+            "train_date, train_id, stop_idx, station_id, train_code, arrive_day, arrive_time, start_day, start_time " +
+            "FROM stops " +
+            "WHERE train_date = #{date} AND train_id = #{trainId} AND stop_idx = #{stopIdx}")
+    StopEntity selectByStopIdx(LocalDate date, Long trainId, Integer stopIdx);
 }

@@ -8,8 +8,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -25,7 +23,7 @@ public class TimeTableService {
 
     public List<TimeTableRow> getTable(LocalDate date, String code) {
         Long id = stopMapper.selectIdByCode(date, code);
-        List<StopEntity> entities = stopMapper.selectById(date, id);
+        List<StopEntity> entities = stopMapper.selectByTrainId(date, id);
         List<TimeTableRow> table = entities.stream().map(entity -> new TimeTableRow(
                 stationService.get(entity.getStationId()).telecode(),
                 entity.getTrainCode(),

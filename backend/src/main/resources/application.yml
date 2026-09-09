@@ -21,4 +21,3 @@ mybatis:
 
 data:
   dir: ../data
-  imported: false

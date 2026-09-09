@@ -1,25 +1,40 @@
 package cn.nispring.rail12306.scheduled;
 
 import cn.nispring.rail12306.config.DataProperties;
+import cn.nispring.rail12306.entity.AreaEntity;
+import cn.nispring.rail12306.entity.CarEntity;
 import cn.nispring.rail12306.entity.CarLayoutEntity;
 import cn.nispring.rail12306.entity.PriceEntity;
+import cn.nispring.rail12306.entity.StationEntity;
 import cn.nispring.rail12306.entity.StopEntity;
+import cn.nispring.rail12306.entity.TrainEntity;
+import cn.nispring.rail12306.mapper.AreaMapper;
 import cn.nispring.rail12306.mapper.CarLayoutMapper;
+import cn.nispring.rail12306.mapper.CarMapper;
 import cn.nispring.rail12306.mapper.PriceMapper;
+import cn.nispring.rail12306.mapper.StationMapper;
 import cn.nispring.rail12306.mapper.StopMapper;
+import cn.nispring.rail12306.mapper.TrainMapper;
 import cn.nispring.rail12306.model.SeatType;
 import cn.nispring.rail12306.model.layout.Layout;
+import cn.nispring.rail12306.service.AreaService;
+import cn.nispring.rail12306.service.CarService;
 import cn.nispring.rail12306.service.StationService;
+import cn.nispring.rail12306.service.TrainService;
+import org.jspecify.annotations.NonNull;
 import tools.jackson.databind.ObjectMapper;
-import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.ApplicationArguments;
+import org.springframework.boot.ApplicationRunner;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -28,9 +43,12 @@ import java.util.*;
 import static cn.nispring.rail12306.util.Util.readCsv;
 
 @Component
-public class TrainImport {
+public class TrainImport implements ApplicationRunner {
 
     private static final Logger log = LoggerFactory.getLogger(TrainImport.class);
+
+    private static final int DAY_TO_GEN = 15;
+    private static final int BASIC_BATCH_SIZE = 1000;
 
     private final StopMapper stopMapper;
     private final DataProperties dataProperties;
@@ -39,10 +57,21 @@ public class TrainImport {
     private final StationService stationService;
     private final PriceMapper priceMapper;
     private final TransactionTemplate transactionTemplate;
+    private final AreaMapper areaMapper;
+    private final CarMapper carMapper;
+    private final TrainMapper trainMapper;
+    private final StationMapper stationMapper;
+    private final JdbcTemplate jdbcTemplate;
+    private final AreaService areaService;
+    private final TrainService trainService;
+    private final CarService carService;
 
     public TrainImport(StopMapper stopMapper, DataProperties dataProperties, ObjectMapper objectMapper,
                        CarLayoutMapper carLayoutMapper, StationService stationService, PriceMapper priceMapper,
-                       PlatformTransactionManager transactionManager) {
+                       PlatformTransactionManager transactionManager,
+                       AreaMapper areaMapper, CarMapper carMapper, TrainMapper trainMapper,
+                       StationMapper stationMapper, JdbcTemplate jdbcTemplate,
+                       AreaService areaService, TrainService trainService, CarService carService) {
         this.stopMapper = stopMapper;
         this.dataProperties = dataProperties;
         this.objectMapper = objectMapper;
@@ -50,14 +79,32 @@ public class TrainImport {
         this.stationService = stationService;
         this.priceMapper = priceMapper;
         this.transactionTemplate = new TransactionTemplate(transactionManager);
+        this.areaMapper = areaMapper;
+        this.carMapper = carMapper;
+        this.trainMapper = trainMapper;
+        this.stationMapper = stationMapper;
+        this.jdbcTemplate = jdbcTemplate;
+        this.areaService = areaService;
+        this.trainService = trainService;
+        this.carService = carService;
     }
 
     /**
-     * 每天 12:00（北京时间）和应用启动时执行
+     * 应用启动后执行一次
+     */
+    @Override
+    public void run(@NonNull ApplicationArguments args) throws Exception {
+        importTrain();
+    }
+
+    /**
+     * 每天 12:00（北京时间）执行
      */
     @Scheduled(cron = "0 0 12 * * *", zone = "Asia/Shanghai")
-    @PostConstruct
     public void importTrain() throws IOException {
+        // 先导基础数据，后续 stops/car_layouts/prices 都依赖它
+        importBasicData();
+
         stopMapper.deleteOld();
         log.info("delete old records for table stops");
 
@@ -87,9 +134,8 @@ public class TrainImport {
         log.info("read {} records from stops csv", stops.size());
 
         LocalDate now = LocalDate.now();
-        int dayToGen = 15;
 
-        for (int i = 0; i < dayToGen; i += 1) {
+        for (int i = 0; i < DAY_TO_GEN; i += 1) {
             LocalDate date = now.plusDays(i);
             if (stopMapper.existsByDate(date)) {
                 continue;
@@ -134,7 +180,7 @@ public class TrainImport {
             ));
         }
 
-        for (int i = 0; i < dayToGen; i += 1) {
+        for (int i = 0; i < DAY_TO_GEN; i += 1) {
             LocalDate date = now.plusDays(i);
             if (carLayoutMapper.existsByDate(date)) {
                 continue;
@@ -224,7 +270,7 @@ public class TrainImport {
         }
         log.info("produce {} prices", prices.size());
 
-        for (int i = 0; i < dayToGen; i += 1) {
+        for (int i = 0; i < DAY_TO_GEN; i += 1) {
             LocalDate date = now.plusDays(i);
             if (priceMapper.existsByDate(date)) {
                 continue;
@@ -243,5 +289,101 @@ public class TrainImport {
             });
             log.info("import records on {} for prices", date);
         }
+    }
+
+    // ======================================================================
+    // 基础数据：areas / stations / trains / cars
+    // ======================================================================
+
+    private void importBasicData() throws IOException {
+        Path dir = dataProperties.getDir().toAbsolutePath().normalize();
+        if (!Files.isDirectory(dir)) {
+            throw new IllegalStateException("not a directory: " + dir + ", indicate with data.dir");
+        }
+        log.info("begin to import basic data in {}", dir);
+
+        clearBasicTables();
+
+        importAreas(dir.resolve("areas.csv"));
+        importStations(dir.resolve("stations.csv"));
+        importTrains(dir.resolve("trains.csv"));
+        importCars(dir.resolve("cars.csv"));
+
+        // 清空重建后刷新各 service 的内存缓存，否则同一次启动里用到的仍是旧缓存（空库时为空）
+        areaService.reloadAll();
+        stationService.reloadAll();
+        trainService.reloadAll();
+        carService.reloadAll();
+
+        log.info("import basic data finish");
+    }
+
+    private void clearBasicTables() {
+        for (String table : List.of("areas", "cars", "trains", "stations")) {
+            jdbcTemplate.execute("TRUNCATE TABLE " + table);
+        }
+    }
+
+    private void importAreas(Path path) throws IOException {
+        List<AreaEntity> areas = new ArrayList<>();
+        for (String[] row : readCsv(path)) {
+            AreaEntity area = new AreaEntity();
+            area.setId(Long.parseLong(row[0]));
+            area.setName(row[1]);
+            areas.add(area);
+        }
+        insertInBatches(areas, areaMapper::insertBatch, "areas");
+    }
+
+    private void importStations(Path path) throws IOException {
+        List<StationEntity> stations = new ArrayList<>();
+        for (String[] row : readCsv(path)) {
+            StationEntity station = new StationEntity();
+            station.setId(Long.parseLong(row[0]));
+            station.setAreaId(Long.parseLong(row[1]));
+            station.setTelecode(row[2]);
+            station.setName(row[3]);
+            stations.add(station);
+        }
+        insertInBatches(stations, stationMapper::insertBatch, "stations");
+    }
+
+    private void importTrains(Path path) throws IOException {
+        List<TrainEntity> trains = new ArrayList<>();
+        for (String[] row : readCsv(path)) {
+            TrainEntity train = new TrainEntity();
+            train.setId(Long.parseLong(row[0]));
+            train.setNumber(row[1]);
+            trains.add(train);
+        }
+        insertInBatches(trains, trainMapper::insertBatch, "trains");
+    }
+
+    private void importCars(Path path) throws IOException {
+        List<CarEntity> cars = new ArrayList<>();
+        for (String[] row : readCsv(path)) {
+            CarEntity car = new CarEntity();
+            car.setId(Long.parseLong(row[0]));
+            car.setStyle(row[1]);
+            car.setCode(row[2]);
+            cars.add(car);
+        }
+        insertInBatches(cars, carMapper::insertBatch, "cars");
+    }
+
+    private <T> void insertInBatches(List<T> items, BatchInserter<T> inserter, String table) {
+        for (int i = 0; i < items.size(); i += BASIC_BATCH_SIZE) {
+            List<T> batch = items.subList(i, Math.min(i + BASIC_BATCH_SIZE, items.size()));
+            int count = inserter.insert(batch);
+            if (count != batch.size()) {
+                throw new IllegalStateException(table + " insert error: expect " + batch.size() + " rows, got " + count + " rows");
+            }
+        }
+        log.info("import {} rows for {}", items.size(), table);
+    }
+
+    @FunctionalInterface
+    private interface BatchInserter<T> {
+        int insert(List<T> items);
     }
 }

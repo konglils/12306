@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { ChevronDown, ChevronUp } from 'lucide-react'
-import type { Ticket } from '@/types'
+import { SEAT_TYPE_LABEL, type Ticket } from '@/types'
+import { useStations } from '@/store/stations'
 
 function formatPrice(price: number): string {
   return String(price).replace(/\B(?=(\d{3})+(?!\d))/g, ',')
@@ -21,13 +22,17 @@ function calcDuration(start: string, arrive: string, arriveDay: number): string 
 
 interface Props {
   ticket: Ticket
-  fromName: string
-  toName: string
 }
 
-export default function TicketCard({ ticket: t, fromName, toName }: Props) {
+export default function TicketCard({ ticket: t }: Props) {
   const [expanded, setExpanded] = useState(false)
   const isExpanded = expanded
+  // 站名以本张票返回的电报码为准映射，而不是查询时选择的站点
+  const stationNames = useStations(s => s.stations)
+  const fromName = stationNames[t.fromTelecode] ?? t.fromTelecode
+  const toName = stationNames[t.toTelecode] ?? t.toTelecode
+  // 座位按价格从低到高展示
+  const seats = useMemo(() => [...t.seats].sort((a, b) => a.price - b.price), [t.seats])
   const minPrice = Math.min(...t.seats.map(s => s.price)) / 10
 
   return (
@@ -68,9 +73,9 @@ export default function TicketCard({ ticket: t, fromName, toName }: Props) {
         {/* 座位快捷状态 */}
         {!isExpanded && (
           <div className="flex flex-wrap gap-x-4 gap-y-1 mt-3 pt-3 border-t border-border">
-            {t.seats.map(s => (
+            {seats.map(s => (
               <span key={s.type} className="text-sm text-foreground">
-                {s.type}{' '}
+                {SEAT_TYPE_LABEL[s.type] ?? s.type}{' '}
                 <span className={s.remaining > 0 ? 'text-success' : 'text-muted-foreground'}>
                   {s.remaining > 0 ? (s.remaining < 20 ? `${s.remaining}张` : '有票') : '售罄'}
                 </span>
@@ -83,12 +88,12 @@ export default function TicketCard({ ticket: t, fromName, toName }: Props) {
       {/* 展开：座位价格详情 */}
       {isExpanded && (
         <div className="mt-3 pt-3 border-t border-border space-y-1">
-          {t.seats.map(s => (
+          {seats.map(s => (
             <div
               key={s.type}
               className="flex items-center px-2 py-2 rounded-md hover:bg-muted/50 transition-colors"
             >
-              <span className="w-16 text-sm font-medium text-foreground">{s.type}</span>
+              <span className="w-16 text-sm font-medium text-foreground">{SEAT_TYPE_LABEL[s.type] ?? s.type}</span>
               <span className="flex-1 text-price font-bold text-lg tabular-nums">
                 ¥{formatPrice(s.price / 10)}
               </span>

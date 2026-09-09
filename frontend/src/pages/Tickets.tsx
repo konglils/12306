@@ -17,22 +17,33 @@ function formatDate(d: string): string {
 export default function Tickets() {
   const [searchParams, setSearchParams] = useSearchParams()
   const stations = useStations(s => s.stations)
+  const areaIdByTelecode = useStations(s => s.areaIdByTelecode)
 
   const from = searchParams.get('from') || ''
   const to = searchParams.get('to') || ''
   const date = searchParams.get('date') || ''
 
+  // URL 里是车站电报码，/tickets 入参要求城市区域 id
+  const fromAreaId = from ? areaIdByTelecode[from] : undefined
+  const toAreaId = to ? areaIdByTelecode[to] : undefined
+
   const [tickets, setTickets] = useState<Ticket[]>([])
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    if (!from || !to) return
+    // 车站 -> areaId 的映射尚未加载完时不发请求
+    if (fromAreaId === undefined || toAreaId === undefined) return
     setLoading(true)
-    axios.get('/api/tickets', { params: { from, to, date } })
-      .then(res => setTickets(res.data))
+    axios.get('/api/tickets', { params: { from: fromAreaId, to: toAreaId, date } })
+      // 按开点从早到晚排序（HH:mm 字符串可直接比较），开点相同按车次
+      .then(res => setTickets(
+        [...(res.data as Ticket[])].sort((a, b) =>
+          a.startTime.localeCompare(b.startTime) || a.trainCode.localeCompare(b.trainCode)
+        )
+      ))
       .catch(() => setTickets([]))
       .finally(() => setLoading(false))
-  }, [from, to, date])
+  }, [fromAreaId, toAreaId, date])
 
   function handleSearch(f: string, t: string, d: string) {
     setSearchParams({ from: f, to: t, date: d })
@@ -40,7 +51,7 @@ export default function Tickets() {
 
   const fromName = stations[from] || from || '出发站'
   const toName = stations[to] || to || '到达站'
-  const hasParams = from && to
+  const hasParams = fromAreaId !== undefined && toAreaId !== undefined
 
   return (
     <div>
@@ -79,8 +90,8 @@ export default function Tickets() {
           </div>
 
           <div className="space-y-2">
-            {tickets.map(t => (
-              <TicketCard key={t.trainCode} ticket={t} fromName={fromName} toName={toName} />
+            {tickets.map((t, i) => (
+              <TicketCard key={`${t.trainCode}-${t.startTime}-${t.arriveTime}-${i}`} ticket={t} />
             ))}
           </div>
         </section>

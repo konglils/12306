@@ -20,7 +20,8 @@ public class AreaService {
     }
 
     @PostConstruct
-    public void loadAll() {
+    public void reloadAll() {
+        map.clear();
         for (AreaEntity area : areaMapper.selectAll()) {
             map.put(area.getId(), new Area(area.getName()));
         }

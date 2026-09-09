@@ -9,6 +9,10 @@ import cn.nispring.rail12306.mapper.AreaMapper;
 import cn.nispring.rail12306.mapper.CarMapper;
 import cn.nispring.rail12306.mapper.StationMapper;
 import cn.nispring.rail12306.mapper.TrainMapper;
+import cn.nispring.rail12306.service.AreaService;
+import cn.nispring.rail12306.service.CarService;
+import cn.nispring.rail12306.service.StationService;
+import cn.nispring.rail12306.service.TrainService;
 import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,16 +47,25 @@ public class DataImportRunner implements CommandLineRunner {
     private final TrainMapper trainMapper;
     private final StationMapper stationMapper;
     private final JdbcTemplate jdbcTemplate;
+    private final AreaService areaService;
+    private final StationService stationService;
+    private final TrainService trainService;
+    private final CarService carService;
 
     public DataImportRunner(DataProperties dataProperties, AreaMapper areaMapper, CarMapper carMapper,
-                            TrainMapper trainMapper, StationMapper stationMapper,
-                            JdbcTemplate jdbcTemplate) {
+                            TrainMapper trainMapper, StationMapper stationMapper, JdbcTemplate jdbcTemplate,
+                            AreaService areaService, StationService stationService, TrainService trainService,
+                            CarService carService) {
         this.dataProperties = dataProperties;
         this.areaMapper = areaMapper;
         this.carMapper = carMapper;
         this.trainMapper = trainMapper;
         this.stationMapper = stationMapper;
         this.jdbcTemplate = jdbcTemplate;
+        this.areaService = areaService;
+        this.stationService = stationService;
+        this.trainService = trainService;
+        this.carService = carService;
     }
 
     @Override
@@ -69,6 +82,11 @@ public class DataImportRunner implements CommandLineRunner {
         importStations(dir.resolve("stations.csv"));
         importTrains(dir.resolve("trains.csv"));
         importCars(dir.resolve("cars.csv"));
+
+        areaService.reloadAll();
+        stationService.reloadAll();
+        trainService.reloadAll();
+        carService.reloadAll();
 
         log.info("import finish");
     }

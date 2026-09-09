@@ -21,7 +21,8 @@ public class StationService {
     }
 
     @PostConstruct
-    public void loadAll() {
+    public void reloadAll() {
+        map.clear();
         for (StationEntity entity : stationMapper.selectAll()) {
             map.put(entity.getId(), new Station(entity.getAreaId(), entity.getTelecode(), entity.getName()));
         }

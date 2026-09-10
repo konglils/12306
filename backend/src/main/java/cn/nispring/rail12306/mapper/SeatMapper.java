@@ -1,6 +1,7 @@
 package cn.nispring.rail12306.mapper;
 
 import cn.nispring.rail12306.entity.SeatEntity;
+import cn.nispring.rail12306.model.SeatType;
 import org.apache.ibatis.annotations.*;
 
 import java.time.LocalDate;
@@ -10,7 +11,7 @@ import java.util.List;
 public interface SeatMapper {
 
     @Delete("DELETE FROM seats WHERE train_date < CURRENT_DATE()")
-    void deleteOld();
+    int deleteOld();
 
     @Insert("""
             <script>
@@ -22,7 +23,7 @@ public interface SeatMapper {
             </foreach>
             </script>
             """)
-    int insertBatch(List<SeatEntity> entities);
+    void insertBatch(List<SeatEntity> entities);
 
     @Select("SELECT EXISTS(SELECT 1 FROM seats WHERE train_date = #{date})")
     boolean existsByDate(LocalDate date);
@@ -30,6 +31,7 @@ public interface SeatMapper {
     @Select("SELECT train_date, train_id, seat_type, segment_idx, graph " +
             "FROM seats " +
             "WHERE train_date = #{date} AND train_id = #{trainId} AND seat_type = #{seatType} AND " +
-            "segment_idx >= #{fromIdx} AND segment_idx <= #{toIdx}")
-    List<SeatEntity> select(LocalDate date, Long trainId, String seatType, Integer fromIdx, Integer toIdx);
+            "segment_idx >= #{fromIdx} AND segment_idx <= #{toIdx} " +
+            "ORDER BY segment_idx")
+    List<SeatEntity> select(LocalDate date, Long trainId, SeatType seatType, Integer fromIdx, Integer toIdx);
 }

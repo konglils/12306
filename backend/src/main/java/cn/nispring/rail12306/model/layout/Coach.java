@@ -6,7 +6,6 @@ import java.util.List;
 
 public record Coach(
         String name,
-        Boolean mute,
         @JsonProperty("seat") List<String> seats
 ) {
 }

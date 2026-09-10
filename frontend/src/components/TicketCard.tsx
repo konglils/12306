@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { ChevronDown, ChevronUp } from 'lucide-react'
-import { SEAT_TYPE_LABEL, type Ticket } from '@/types'
+import { SEAT_TYPE_LABEL, type Seat, type Ticket } from '@/types'
 import { useStations } from '@/store/stations'
 
 function formatPrice(price: number): string {
@@ -20,6 +20,11 @@ function calcDuration(start: string, arrive: string, arriveDay: number): string 
   return `${h}时${m > 0 ? m + '分' : ''}`
 }
 
+// 无座（hasSeat=false）统一显示“无座”，其余按席别编码映射中文名
+function seatLabel(s: Seat): string {
+  return s.hasSeat ? (SEAT_TYPE_LABEL[s.type] ?? s.type) : '无座'
+}
+
 interface Props {
   ticket: Ticket
   date: string
@@ -33,7 +38,14 @@ export default function TicketCard({ ticket: t, date }: Props) {
   const fromName = stationNames[t.fromTelecode] ?? t.fromTelecode
   const toName = stationNames[t.toTelecode] ?? t.toTelecode
   // 座位按价格从低到高展示
-  const seats = useMemo(() => [...t.seats].sort((a, b) => a.price - b.price), [t.seats])
+  // 有座类型在前、无座在后；各自组内按价格从低到高
+  const seats = useMemo(
+    () => [...t.seats].sort((a, b) => {
+      if (a.hasSeat !== b.hasSeat) return a.hasSeat ? -1 : 1
+      return a.price - b.price
+    }),
+    [t.seats],
+  )
   const minPrice = Math.min(...t.seats.map(s => s.price)) / 10
 
   return (
@@ -75,8 +87,8 @@ export default function TicketCard({ ticket: t, date }: Props) {
         {!isExpanded && (
           <div className="flex flex-wrap gap-x-4 gap-y-1 mt-3 pt-3 border-t border-border">
             {seats.map(s => (
-              <span key={s.type} className="text-sm text-foreground">
-                {SEAT_TYPE_LABEL[s.type] ?? s.type}{' '}
+              <span key={`${s.type}-${s.hasSeat}`} className="text-sm text-foreground">
+                {seatLabel(s)}{' '}
                 <span className={s.remaining > 0 ? 'text-success' : 'text-muted-foreground'}>
                   {s.remaining > 0 ? (s.remaining < 20 ? `${s.remaining}张` : '有票') : '售罄'}
                 </span>
@@ -91,10 +103,10 @@ export default function TicketCard({ ticket: t, date }: Props) {
         <div className="mt-3 pt-3 border-t border-border space-y-1">
           {seats.map(s => (
             <div
-              key={s.type}
+              key={`${s.type}-${s.hasSeat}`}
               className="flex items-center px-2 py-2 rounded-md hover:bg-muted/50 transition-colors"
             >
-              <span className="w-16 text-sm font-medium text-foreground">{SEAT_TYPE_LABEL[s.type] ?? s.type}</span>
+              <span className="w-16 text-sm font-medium text-foreground">{seatLabel(s)}</span>
               <span className="flex-1 text-price font-bold text-lg tabular-nums">
                 ¥{formatPrice(s.price / 10)}
               </span>

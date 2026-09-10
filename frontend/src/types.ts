@@ -42,6 +42,7 @@ export const SEAT_TYPE_LABEL: Record<SeatTypeCode, string> = {
 
 export interface Seat {
   type: SeatTypeCode
+  hasSeat: boolean
   price: number
   remaining: number
 }

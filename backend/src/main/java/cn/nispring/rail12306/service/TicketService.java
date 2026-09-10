@@ -49,6 +49,7 @@ public class TicketService {
                     toStop.getArriveTime(),
                     prices.stream().map(price -> new Seat(
                             price.getSeatType(),
+                            price.getHasSeat(),
                             price.getPrice(),
                             0 // TODO 查找 seats 表
                     )).toList());

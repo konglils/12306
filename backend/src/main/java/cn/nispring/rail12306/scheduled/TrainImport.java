@@ -1,21 +1,10 @@
 package cn.nispring.rail12306.scheduled;
 
 import cn.nispring.rail12306.config.DataProperties;
-import cn.nispring.rail12306.entity.AreaEntity;
-import cn.nispring.rail12306.entity.CarEntity;
-import cn.nispring.rail12306.entity.CarLayoutEntity;
-import cn.nispring.rail12306.entity.PriceEntity;
-import cn.nispring.rail12306.entity.StationEntity;
-import cn.nispring.rail12306.entity.StopEntity;
-import cn.nispring.rail12306.entity.TrainEntity;
-import cn.nispring.rail12306.mapper.AreaMapper;
-import cn.nispring.rail12306.mapper.CarLayoutMapper;
-import cn.nispring.rail12306.mapper.CarMapper;
-import cn.nispring.rail12306.mapper.PriceMapper;
-import cn.nispring.rail12306.mapper.StationMapper;
-import cn.nispring.rail12306.mapper.StopMapper;
-import cn.nispring.rail12306.mapper.TrainMapper;
+import cn.nispring.rail12306.entity.*;
+import cn.nispring.rail12306.mapper.*;
 import cn.nispring.rail12306.model.SeatType;
+import cn.nispring.rail12306.model.layout.Coach;
 import cn.nispring.rail12306.model.layout.Layout;
 import cn.nispring.rail12306.service.AreaService;
 import cn.nispring.rail12306.service.CarService;
@@ -65,13 +54,14 @@ public class TrainImport implements ApplicationRunner {
     private final AreaService areaService;
     private final TrainService trainService;
     private final CarService carService;
+    private final SeatMapper seatMapper;
 
     public TrainImport(StopMapper stopMapper, DataProperties dataProperties, ObjectMapper objectMapper,
                        CarLayoutMapper carLayoutMapper, StationService stationService, PriceMapper priceMapper,
-                       PlatformTransactionManager transactionManager,
-                       AreaMapper areaMapper, CarMapper carMapper, TrainMapper trainMapper,
-                       StationMapper stationMapper, JdbcTemplate jdbcTemplate,
-                       AreaService areaService, TrainService trainService, CarService carService) {
+                       PlatformTransactionManager transactionManager, AreaMapper areaMapper, CarMapper carMapper,
+                       TrainMapper trainMapper, StationMapper stationMapper, JdbcTemplate jdbcTemplate,
+                       AreaService areaService, TrainService trainService, CarService carService,
+                       SeatMapper seatMapper) {
         this.stopMapper = stopMapper;
         this.dataProperties = dataProperties;
         this.objectMapper = objectMapper;
@@ -87,6 +77,7 @@ public class TrainImport implements ApplicationRunner {
         this.areaService = areaService;
         this.trainService = trainService;
         this.carService = carService;
+        this.seatMapper = seatMapper;
     }
 
     /**
@@ -288,6 +279,114 @@ public class TrainImport implements ApplicationRunner {
                 }
             });
             log.info("import records on {} for prices", date);
+        }
+
+        // ======================================================================
+
+        List<Coach> businessCoaches = layout.seatLayouts().getFirst().coaches();
+        List<Coach> firstClassCoaches = layout.seatLayouts().get(1).coaches();
+        List<Coach> secondClassCoaches = layout.seatLayouts().get(2).coaches();
+
+        int businessGraphLen = 0;
+        for (Coach coach : businessCoaches) {
+            businessGraphLen += (coach.seats().size() - 1) / 3 + 1;
+        }
+        int firstClassGraphLen = 0;
+        for (Coach coach : firstClassCoaches) {
+            firstClassGraphLen += (coach.seats().size() - 1) / 4 + 1;
+        }
+        int secondClassGraphLen = 0;
+        for (Coach coach : secondClassCoaches) {
+            secondClassGraphLen += (coach.seats().size() - 1) / 5 + 1;
+        }
+
+        byte[] businessGraph = new byte[businessGraphLen];
+        byte[] firstClassGraph = new byte[firstClassGraphLen];
+        byte[] secondClassGraph = new byte[secondClassGraphLen];
+        int nthByte = 0;
+        for (Coach coach : businessCoaches) {
+            for (int i = 0; i < coach.seats().size(); i += 3) {
+                for (int j = 0; j < 3; j += 1) {
+                    if (i + j < coach.seats().size() && coach.seats().get(i + j) != null) {
+                        businessGraph[nthByte] |= (byte) (1 << j);
+                    }
+                }
+                nthByte += 1;
+            }
+        }
+        nthByte = 0;
+        for (Coach coach : firstClassCoaches) {
+            for (int i = 0; i < coach.seats().size(); i += 4) {
+                for (int j = 0; j < 4; j += 1) {
+                    if (i + j < coach.seats().size() && coach.seats().get(i + j) != null) {
+                        firstClassGraph[nthByte] |= (byte) (1 << j);
+                    }
+                }
+                nthByte += 1;
+            }
+        }
+        nthByte = 0;
+        for (Coach coach : secondClassCoaches) {
+            for (int i = 0; i < coach.seats().size(); i += 5) {
+                for (int j = 0; j < 5; j += 1) {
+                    if (i + j < coach.seats().size() && coach.seats().get(i + j) != null) {
+                        secondClassGraph[nthByte] |= (byte) (1 << j);
+                    }
+                }
+                nthByte += 1;
+            }
+        }
+
+        int numSeatDel = seatMapper.deleteOld();
+        log.info("delete {} old records for car_layouts", numSeatDel);
+
+        List<SeatEntity> seats = new ArrayList<>();
+        for (List<StopEntity> stopEntities : stopMap.values()) {
+            StopEntity last = stopEntities.getLast();
+            for (int i = 0; i < last.getStopIdx(); i += 1) {
+                seats.add(new SeatEntity(
+                        null,
+                        stopEntities.getFirst().getTrainId(),
+                        SeatType.SECOND_CLASS,
+                        i,
+                        secondClassGraph));
+            }
+
+            for (int i = 0; i < last.getStopIdx(); i += 1) {
+                seats.add(new SeatEntity(
+                        null,
+                        stopEntities.getFirst().getTrainId(),
+                        SeatType.FIRST_CLASS,
+                        i,
+                        firstClassGraph));
+            }
+
+            for (int i = 0; i < last.getStopIdx(); i += 1) {
+                seats.add(new SeatEntity(
+                        null,
+                        stopEntities.getFirst().getTrainId(),
+                        SeatType.BUSINESS,
+                        i,
+                        businessGraph));
+            }
+        }
+        log.info("produce {} records for seats", seats.size());
+
+        for (int i = 0; i < DAY_TO_GEN; i += 1) {
+            LocalDate date = now.plusDays(i);
+            if (seatMapper.existsByDate(date)) {
+                continue;
+            }
+
+            for (SeatEntity seat : seats) {
+                seat.setTrainDate(date);
+            }
+            int n = 1000;
+            for (int j = 0; j < seats.size(); j += n) {
+                List<SeatEntity> sub = seats.subList(j, Math.min(j + n, seats.size()));
+                seatMapper.insertBatch(sub);
+            }
+            log.info("import records on {} for seats", date);
         }
     }
 

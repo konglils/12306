@@ -22,9 +22,10 @@ function calcDuration(start: string, arrive: string, arriveDay: number): string 
 
 interface Props {
   ticket: Ticket
+  date: string
 }
 
-export default function TicketCard({ ticket: t }: Props) {
+export default function TicketCard({ ticket: t, date }: Props) {
   const [expanded, setExpanded] = useState(false)
   const isExpanded = expanded
   // 站名以本张票返回的电报码为准映射，而不是查询时选择的站点
@@ -48,7 +49,7 @@ export default function TicketCard({ ticket: t }: Props) {
               <div className="text-sm text-foreground mt-0.5">{fromName}</div>
             </div>
             <Link
-              to={`/trains?code=${t.trainCode}`}
+              to={`/timetable?code=${encodeURIComponent(t.trainCode)}&date=${encodeURIComponent(date)}`}
               className="text-center no-underline hover:underline underline-offset-2"
               onClick={e => e.stopPropagation()}
             >

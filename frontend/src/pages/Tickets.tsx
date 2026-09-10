@@ -91,7 +91,11 @@ export default function Tickets() {
 
           <div className="space-y-2">
             {tickets.map((t, i) => (
-              <TicketCard key={`${t.trainCode}-${t.startTime}-${t.arriveTime}-${i}`} ticket={t} />
+              <TicketCard
+                key={`${t.trainCode}-${t.startTime}-${t.arriveTime}-${i}`}
+                ticket={t}
+                date={date}
+              />
             ))}
           </div>
         </section>

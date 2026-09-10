@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { ChevronDown, ChevronUp } from 'lucide-react'
-import type { Ticket } from '@/types'
+import { SEAT_TYPE_LABEL, type Seat, type Ticket } from '@/types'
+import { useStations } from '@/store/stations'
 
 function formatPrice(price: number): string {
   return String(price).replace(/\B(?=(\d{3})+(?!\d))/g, ',')
@@ -19,15 +20,38 @@ function calcDuration(start: string, arrive: string, arriveDay: number): string 
   return `${h}时${m > 0 ? m + '分' : ''}`
 }
 
-interface Props {
-  ticket: Ticket
-  fromName: string
-  toName: string
+// 无座（hasSeat=false）统一显示“无座”，其余按席别编码映射中文名
+function seatLabel(s: Seat): string {
+  return s.hasSeat ? (SEAT_TYPE_LABEL[s.type] ?? s.type) : '无座'
 }
 
-export default function TicketCard({ ticket: t, fromName, toName }: Props) {
+// 余票文案：少量显示具体张数，充足显示“有票”，无票显示“售罄”
+function remainingText(s: Seat): string {
+  if (s.remaining <= 0) return '售罄'
+  return s.remaining < 20 ? `${s.remaining}张` : '有票'
+}
+
+interface Props {
+  ticket: Ticket
+  date: string
+}
+
+export default function TicketCard({ ticket: t, date }: Props) {
   const [expanded, setExpanded] = useState(false)
   const isExpanded = expanded
+  // 站名以本张票返回的电报码为准映射，而不是查询时选择的站点
+  const stationNames = useStations(s => s.stations)
+  const fromName = stationNames[t.fromTelecode] ?? t.fromTelecode
+  const toName = stationNames[t.toTelecode] ?? t.toTelecode
+  // 座位按价格从低到高展示
+  // 有座类型在前、无座在后；各自组内按价格从低到高
+  const seats = useMemo(
+    () => [...t.seats].sort((a, b) => {
+      if (a.hasSeat !== b.hasSeat) return a.hasSeat ? -1 : 1
+      return a.price - b.price
+    }),
+    [t.seats],
+  )
   const minPrice = Math.min(...t.seats.map(s => s.price)) / 10
 
   return (
@@ -43,7 +67,7 @@ export default function TicketCard({ ticket: t, fromName, toName }: Props) {
               <div className="text-sm text-foreground mt-0.5">{fromName}</div>
             </div>
             <Link
-              to={`/trains?code=${t.trainCode}`}
+              to={`/timetable?code=${encodeURIComponent(t.trainCode)}&date=${encodeURIComponent(date)}`}
               className="text-center no-underline hover:underline underline-offset-2"
               onClick={e => e.stopPropagation()}
             >
@@ -68,11 +92,11 @@ export default function TicketCard({ ticket: t, fromName, toName }: Props) {
         {/* 座位快捷状态 */}
         {!isExpanded && (
           <div className="flex flex-wrap gap-x-4 gap-y-1 mt-3 pt-3 border-t border-border">
-            {t.seats.map(s => (
-              <span key={s.type} className="text-sm text-foreground">
-                {s.type}{' '}
+            {seats.map(s => (
+              <span key={`${s.type}-${s.hasSeat}`} className="text-sm text-foreground">
+                {seatLabel(s)}{' '}
                 <span className={s.remaining > 0 ? 'text-success' : 'text-muted-foreground'}>
-                  {s.remaining > 0 ? (s.remaining < 20 ? `${s.remaining}张` : '有票') : '售罄'}
+                  {remainingText(s)}
                 </span>
               </span>
             ))}
@@ -83,17 +107,17 @@ export default function TicketCard({ ticket: t, fromName, toName }: Props) {
       {/* 展开：座位价格详情 */}
       {isExpanded && (
         <div className="mt-3 pt-3 border-t border-border space-y-1">
-          {t.seats.map(s => (
+          {seats.map(s => (
             <div
-              key={s.type}
+              key={`${s.type}-${s.hasSeat}`}
               className="flex items-center px-2 py-2 rounded-md hover:bg-muted/50 transition-colors"
             >
-              <span className="w-16 text-sm font-medium text-foreground">{s.type}</span>
+              <span className="w-16 text-sm font-medium text-foreground">{seatLabel(s)}</span>
               <span className="flex-1 text-price font-bold text-lg tabular-nums">
                 ¥{formatPrice(s.price / 10)}
               </span>
               <span className={`text-sm w-16 text-center ${s.remaining > 0 ? 'text-success' : 'text-muted-foreground'}`}>
-                {s.remaining > 0 ? '有票' : '售罄'}
+                {remainingText(s)}
               </span>
               <Button
                 variant="outline"

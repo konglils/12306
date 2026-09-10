@@ -20,7 +20,8 @@ public class CarService {
     }
 
     @PostConstruct
-    public void loadAll() {
+    public void reloadAll() {
+        map.clear();
         for (CarEntity car : carMapper.selectAll()) {
             map.put(car.getId(), new Car(car.getStyle(), car.getCode()));
         }

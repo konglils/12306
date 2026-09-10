@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { Link, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import Home from '@/pages/Home'
 import Tickets from '@/pages/Tickets'
-import Trains from '@/pages/Trains'
+import TimeTable from '@/pages/TimeTable'
 import Signin from '@/pages/Signin'
 import Signup from '@/pages/Signup'
 import NotFound from '@/pages/NotFound'
@@ -35,7 +35,7 @@ export default function App() {
         <Tabs value={location.pathname} onValueChange={(v) => navigate(v)}>
           <TabsList variant="line">
             <TabsTrigger value="/tickets">车票</TabsTrigger>
-            <TabsTrigger value="/trains">时刻表</TabsTrigger>
+            <TabsTrigger value="/timetable">时刻表</TabsTrigger>
           </TabsList>
         </Tabs>
         <div className="flex gap-2 ml-auto items-center">
@@ -63,7 +63,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/tickets" element={<Tickets />} />
-          <Route path="/trains" element={<Trains />} />
+          <Route path="/timetable" element={<TimeTable />} />
           <Route path="/signin" element={<Signin />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="*" element={<NotFound />} />

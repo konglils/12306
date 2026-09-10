@@ -20,7 +20,8 @@ public class TrainService {
     }
 
     @PostConstruct
-    public void loadAll() {
+    public void reloadAll() {
+        map.clear();
         for (TrainEntity train : trainMapper.selectAll()) {
             map.put(train.getId(), new Train(train.getNumber()));
         }

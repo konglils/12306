@@ -15,9 +15,19 @@ public interface TrainMapper {
     @Insert("INSERT INTO trains (number) VALUES (#{number})")
     int insert(TrainEntity train);
 
+    @Insert("""
+            <script>
+            INSERT INTO trains (id, number) VALUES
+            <foreach collection="list" item="train" separator=",">
+                (#{train.id}, #{train.number})
+            </foreach>
+            </script>
+            """)
+    int insertBatch(List<TrainEntity> trains);
+
     @Update("UPDATE trains SET number = #{number} WHERE id = #{id}")
-    int updateById(TrainEntity train);
+    void updateById(TrainEntity train);
 
     @Delete("DELETE FROM trains WHERE id = #{id}")
-    int deleteById(Long id);
+    void deleteById(Long id);
 }

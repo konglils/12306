@@ -15,6 +15,16 @@ public interface StationMapper {
     @Options(useGeneratedKeys = true, keyProperty = "id")
     void insert(StationEntity entity);
 
+    @Insert("""
+            <script>
+            INSERT INTO stations (id, area_id, telecode, name) VALUES
+            <foreach collection="list" item="station" separator=",">
+                (#{station.id}, #{station.areaId}, #{station.telecode}, #{station.name})
+            </foreach>
+            </script>
+            """)
+    int insertBatch(List<StationEntity> stations);
+
     @Update("UPDATE stations SET area_id = #{areaId}, telecode = #{telecode}, name = #{name} WHERE id = #{id}")
     void updateById(StationEntity entity);
 

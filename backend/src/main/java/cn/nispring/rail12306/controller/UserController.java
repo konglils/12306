@@ -43,6 +43,12 @@ public class UserController {
         return new User(entity.getId(), entity.getUsername());
     }
 
+    @GetMapping("/session")
+    public User checkLoggedIn(@CookieValue(value = "SESSIONID", required = false) String sessionToken,
+                              HttpServletResponse response) {
+        return userService.checkLoggedIn(sessionToken);
+    }
+
     @DeleteMapping("/session")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void signout(@CookieValue("SESSIONID") String sessionToken, HttpServletResponse response) {

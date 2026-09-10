@@ -1,8 +1,11 @@
 package cn.nispring.rail12306.service;
 
 import cn.nispring.rail12306.entity.UserEntity;
+import cn.nispring.rail12306.exception.BusinessException;
 import cn.nispring.rail12306.mapper.UserMapper;
+import cn.nispring.rail12306.model.User;
 import jakarta.annotation.PostConstruct;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -35,7 +38,7 @@ public class UserService {
 
     public UserEntity signup(String username, String password) {
         if (userMapper.selectByUsername(username) != null) {
-            throw new IllegalArgumentException("用户名已存在");
+            throw new BusinessException(HttpStatus.CONFLICT, "用户名已存在");
         }
 
         String encoded = passwordEncoder.encode(password);
@@ -47,7 +50,7 @@ public class UserService {
     public UserEntity signin(String username, String password) {
         UserEntity entity = userMapper.selectByUsername(username);
         if (entity == null || !passwordEncoder.matches(password, entity.getPassword())) {
-            throw new IllegalArgumentException("用户名或密码错误");
+            throw new BusinessException(HttpStatus.UNAUTHORIZED, "用户名或密码错误");
         }
 
         String token = generateSessionToken();
@@ -61,6 +64,15 @@ public class UserService {
         updateSessionToken(sessionToken, null, id);
     }
 
+    public User checkLoggedIn(String sessionToken) {
+        UserEntity entity = userMapper.selectBySessionToken(sessionToken);
+        if (entity == null) {
+            return null;
+        } else {
+            return new User(entity.getId(), entity.getUsername());
+        }
+    }
+
     private String generateSessionToken() {
         byte[] token = new byte[32];
         secureRandom.nextBytes(token);
@@ -70,7 +82,7 @@ public class UserService {
     private long getLoginId(String sessionToken) {
         Long id = sessionMap.get(sessionToken);
         if (id == null) {
-            throw new IllegalArgumentException("用户未登录");
+            throw new BusinessException(HttpStatus.UNAUTHORIZED, "用户未登录");
         } else {
             return id;
         }

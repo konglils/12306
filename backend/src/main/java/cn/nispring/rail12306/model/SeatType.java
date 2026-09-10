@@ -30,6 +30,7 @@ public enum SeatType {
         this.displayName = displayName;
     }
 
+    @com.fasterxml.jackson.annotation.JsonValue
     public String getCode() {
         return code;
     }
@@ -38,6 +39,7 @@ public enum SeatType {
         return displayName;
     }
 
+    @com.fasterxml.jackson.annotation.JsonCreator
     public static SeatType fromCode(String code) {
         for (SeatType type : values()) {
             if (type.code.equals(code)) {

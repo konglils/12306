@@ -25,6 +25,12 @@ function seatLabel(s: Seat): string {
   return s.hasSeat ? (SEAT_TYPE_LABEL[s.type] ?? s.type) : '无座'
 }
 
+// 余票文案：少量显示具体张数，充足显示“有票”，无票显示“售罄”
+function remainingText(s: Seat): string {
+  if (s.remaining <= 0) return '售罄'
+  return s.remaining < 20 ? `${s.remaining}张` : '有票'
+}
+
 interface Props {
   ticket: Ticket
   date: string
@@ -90,7 +96,7 @@ export default function TicketCard({ ticket: t, date }: Props) {
               <span key={`${s.type}-${s.hasSeat}`} className="text-sm text-foreground">
                 {seatLabel(s)}{' '}
                 <span className={s.remaining > 0 ? 'text-success' : 'text-muted-foreground'}>
-                  {s.remaining > 0 ? (s.remaining < 20 ? `${s.remaining}张` : '有票') : '售罄'}
+                  {remainingText(s)}
                 </span>
               </span>
             ))}
@@ -111,7 +117,7 @@ export default function TicketCard({ ticket: t, date }: Props) {
                 ¥{formatPrice(s.price / 10)}
               </span>
               <span className={`text-sm w-16 text-center ${s.remaining > 0 ? 'text-success' : 'text-muted-foreground'}`}>
-                {s.remaining > 0 ? '有票' : '售罄'}
+                {remainingText(s)}
               </span>
               <Button
                 variant="outline"

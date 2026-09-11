@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,5 +32,37 @@ public class Util {
             }
         }
         return rows;
+    }
+
+    public static boolean isValidChinaIdNo(String idNo) {
+        if (idNo.length() != 18) {
+            return false;
+        }
+        for (int i = 0; i < 17; i += 1) {
+            if (!Character.isDigit(idNo.charAt(i))) {
+                return false;
+            }
+        }
+
+        // 地址码暂不做校验
+
+        String birthCode = idNo.substring(6, 14);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+        try {
+            formatter.parse(birthCode);
+        } catch (DateTimeParseException e) {
+            return false;
+        }
+
+        // 计算校验码
+        int[] weights = {7, 9, 10, 5, 8, 4, 2, 1, 6, 3, 7, 9, 10, 5, 8, 4, 2};
+        int sum = 0;
+        for (int i = 0; i < 17; i += 1) {
+            sum += (idNo.charAt(i) - '0') * weights[i];
+        }
+        char[] verifyCodes = {'1', '0', 'X', '9', '8', '7', '6', '5', '4', '3', '2'};
+        char realCode = verifyCodes[sum % 11];
+        char givenCode = Character.toUpperCase(idNo.charAt(17));
+        return realCode == givenCode;
     }
 }

@@ -14,6 +14,7 @@ public enum Sex {
         this.displayName = displayName;
     }
 
+    @com.fasterxml.jackson.annotation.JsonValue
     public String getCode() {
         return code;
     }
@@ -22,6 +23,7 @@ public enum Sex {
         return displayName;
     }
 
+    @com.fasterxml.jackson.annotation.JsonCreator
     public static Sex fromCode(String code) {
         for (Sex sex : values()) {
             if (sex.code.equals(code)) {

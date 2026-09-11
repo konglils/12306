@@ -16,6 +16,7 @@ public enum DiscountType {
         this.displayName = displayName;
     }
 
+    @com.fasterxml.jackson.annotation.JsonValue
     public int getCode() {
         return code;
     }
@@ -24,6 +25,7 @@ public enum DiscountType {
         return displayName;
     }
 
+    @com.fasterxml.jackson.annotation.JsonCreator
     public static DiscountType fromCode(int code) {
         for (DiscountType type : values()) {
             if (type.code == code) {

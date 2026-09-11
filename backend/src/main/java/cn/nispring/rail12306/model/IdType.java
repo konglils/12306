@@ -20,6 +20,7 @@ public enum IdType {
         this.displayName = displayName;
     }
 
+    @com.fasterxml.jackson.annotation.JsonValue
     public int getCode() {
         return code;
     }
@@ -28,6 +29,7 @@ public enum IdType {
         return displayName;
     }
 
+    @com.fasterxml.jackson.annotation.JsonCreator
     public static IdType fromCode(int code) {
         for (IdType type : values()) {
             if (type.code == code) {

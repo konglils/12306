@@ -3,6 +3,7 @@ package cn.nispring.rail12306.service;
 import cn.nispring.rail12306.entity.UserEntity;
 import cn.nispring.rail12306.exception.BusinessException;
 import cn.nispring.rail12306.mapper.UserMapper;
+import cn.nispring.rail12306.model.SessionUser;
 import cn.nispring.rail12306.model.User;
 import jakarta.annotation.PostConstruct;
 import org.springframework.http.HttpStatus;
@@ -16,27 +17,29 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 public class UserService {
 
-    private final UserMapper userMapper;
     private final BCryptPasswordEncoder passwordEncoder;
-
     private final SecureRandom secureRandom = new SecureRandom();
-    private final ConcurrentHashMap<String, Long> sessionMap = new ConcurrentHashMap<>();
+
+    private final UserMapper userMapper;
+
+    /// 当前登录的用户
+    private final ConcurrentHashMap<String, User> sessionMap = new ConcurrentHashMap<>();
 
     public UserService(UserMapper userMapper) {
-        this.userMapper = userMapper;
         this.passwordEncoder = new BCryptPasswordEncoder();
+        this.userMapper = userMapper;
     }
 
     @PostConstruct
     public void loadSessions() {
         for (UserEntity entity : userMapper.selectSessionTokens()) {
             if (entity.getSessionToken() != null) {
-                sessionMap.put(entity.getSessionToken(), entity.getId());
+                sessionMap.put(entity.getSessionToken(), new User(entity.getId(), entity.getUsername()));
             }
         }
     }
 
-    public UserEntity signup(String username, String password) {
+    public User signup(String username, String password) {
         if (userMapper.selectByUsername(username) != null) {
             throw new BusinessException(HttpStatus.CONFLICT, "用户名已存在");
         }
@@ -44,32 +47,39 @@ public class UserService {
         String encoded = passwordEncoder.encode(password);
         UserEntity entity = new UserEntity(null, username, encoded, null, null, null);
         userMapper.insert(entity);
-        return entity;
+        return new User(entity.getId(), entity.getUsername());
     }
 
-    public UserEntity signin(String username, String password) {
+    public SessionUser signin(String username, String password) {
         UserEntity entity = userMapper.selectByUsername(username);
         if (entity == null || !passwordEncoder.matches(password, entity.getPassword())) {
             throw new BusinessException(HttpStatus.UNAUTHORIZED, "用户名或密码错误");
         }
 
         String token = generateSessionToken();
-        updateSessionToken(null, token, entity.getId());
-        entity.setSessionToken(token);
-        return entity;
+
+        userMapper.updateSessionToken(entity.getId(), token);
+        if (entity.getSessionToken() != null) {
+            sessionMap.remove(entity.getSessionToken());
+        }
+        sessionMap.put(token, new User(entity.getId(), entity.getUsername()));
+        return new SessionUser(entity.getId(), entity.getUsername(), token);
     }
 
     public void signout(String sessionToken) {
-        long id = getLoginId(sessionToken);
-        updateSessionToken(sessionToken, null, id);
+        User user = getUser(sessionToken);
+        if (user == null) {
+            return;
+        }
+        userMapper.updateSessionToken(user.id(), null);
+        sessionMap.remove(sessionToken);
     }
 
-    public User checkLoggedIn(String sessionToken) {
-        UserEntity entity = userMapper.selectBySessionToken(sessionToken);
-        if (entity == null) {
+    public User getUser(String sessionToken) {
+        if (sessionToken == null) {
             return null;
         } else {
-            return new User(entity.getId(), entity.getUsername());
+            return sessionMap.getOrDefault(sessionToken, null);
         }
     }
 
@@ -77,24 +87,5 @@ public class UserService {
         byte[] token = new byte[32];
         secureRandom.nextBytes(token);
         return Base64.getUrlEncoder().withoutPadding().encodeToString(token);
-    }
-
-    private long getLoginId(String sessionToken) {
-        Long id = sessionMap.get(sessionToken);
-        if (id == null) {
-            throw new BusinessException(HttpStatus.UNAUTHORIZED, "用户未登录");
-        } else {
-            return id;
-        }
-    }
-
-    private void updateSessionToken(String old, String neu, long id) {
-        if (old != null) {
-            sessionMap.remove(old);
-        }
-        if (neu != null) {
-            sessionMap.put(neu, id);
-        }
-        userMapper.updateSessionToken(id, neu);
     }
 }

@@ -2,6 +2,7 @@ package cn.nispring.rail12306.service;
 
 import cn.nispring.rail12306.entity.UserEntity;
 import cn.nispring.rail12306.mapper.UserMapper;
+import cn.nispring.rail12306.model.SessionUser;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -32,9 +33,9 @@ public class UserServiceTest {
                 null
         ));
 
-        UserEntity entity = userService.signin("test", "123456");
-        assertNotNull(entity);
-        String token = entity.getSessionToken();
+        SessionUser user = userService.signin("test", "123456");
+        assertNotNull(user);
+        String token = user.sessionToken();
         assertNotNull(token);
 
         userService.signout(token);

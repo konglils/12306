@@ -1,5 +1,9 @@
 package cn.nispring.rail12306.util;
 
+import com.google.i18n.phonenumbers.NumberParseException;
+import com.google.i18n.phonenumbers.PhoneNumberUtil;
+import com.google.i18n.phonenumbers.Phonenumber;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -64,5 +68,20 @@ public class Util {
         char realCode = verifyCodes[sum % 11];
         char givenCode = Character.toUpperCase(idNo.charAt(17));
         return realCode == givenCode;
+    }
+
+    public static String parsePhoneE164(String phone) {
+        PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
+        Phonenumber.PhoneNumber number = null;
+        try {
+            number = phoneUtil.parse(phone, null);
+        } catch (NumberParseException e) {
+            return null;
+        }
+        if (phoneUtil.isValidNumber(number)) {
+            return phoneUtil.format(number, PhoneNumberUtil.PhoneNumberFormat.E164);
+        } else {
+            return null;
+        }
     }
 }

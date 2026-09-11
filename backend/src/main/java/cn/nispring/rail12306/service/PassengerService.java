@@ -7,12 +7,14 @@ import cn.nispring.rail12306.model.IdType;
 import cn.nispring.rail12306.model.Passenger;
 import cn.nispring.rail12306.model.PassengerStatus;
 import cn.nispring.rail12306.model.User;
+import com.google.i18n.phonenumbers.Phonenumber;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
 
 import static cn.nispring.rail12306.util.Util.isValidChinaIdNo;
+import static cn.nispring.rail12306.util.Util.parsePhoneE164;
 
 @Service
 public class PassengerService {
@@ -37,13 +39,17 @@ public class PassengerService {
         entity.setDiscountType(passenger.discountType());
         entity.setStatus(PassengerStatus.PENDING);
 
+        String phoneE164 = parsePhoneE164(passenger.phone());
+
         if (Objects.requireNonNull(passenger.idType()) == IdType.CHINA_RESIDENT) {
-            // TODO 验证手机号格式
+            if (phoneE164 == null) {
+                throw new BusinessException(HttpStatus.BAD_REQUEST, "电话号码格式错误");
+            }
             if (!isValidChinaIdNo(passenger.idNo())) {
                 throw new BusinessException(HttpStatus.BAD_REQUEST, "身份证号格式错误");
             }
             // TODO 异步发送身份证号和姓名核验
-            entity.setPhoneE164(passenger.phone());
+            entity.setPhoneE164(phoneE164);
         }
 
         passengerMapper.insert(entity);

@@ -11,7 +11,6 @@ import cn.nispring.rail12306.service.CarService;
 import cn.nispring.rail12306.service.StationService;
 import cn.nispring.rail12306.service.TrainService;
 import org.jspecify.annotations.NonNull;
-import tools.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
@@ -21,6 +20,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
+import tools.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.nio.file.Files;

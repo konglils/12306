@@ -1,7 +1,10 @@
 package cn.nispring.rail12306.mapper;
 
 import cn.nispring.rail12306.entity.PriceEntity;
-import org.apache.ibatis.annotations.*;
+import org.apache.ibatis.annotations.Delete;
+import org.apache.ibatis.annotations.Insert;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Select;
 
 import java.time.LocalDate;
 import java.util.List;

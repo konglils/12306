@@ -13,7 +13,7 @@ public interface CarMapper {
 
     @Options(useGeneratedKeys = true, keyProperty = "id")
     @Insert("INSERT INTO cars (style, code) VALUES (#{style}, #{code})")
-    int insert(CarEntity car);
+    void insert(CarEntity car);
 
     @Insert("""
             <script>
@@ -26,8 +26,8 @@ public interface CarMapper {
     int insertBatch(List<CarEntity> cars);
 
     @Update("UPDATE cars SET style = #{style}, code = #{code} WHERE id = #{id}")
-    int updateById(CarEntity car);
+    void updateById(CarEntity car);
 
     @Delete("DELETE FROM cars WHERE id = #{id}")
-    int deleteById(Long id);
+    void deleteById(Long id);
 }

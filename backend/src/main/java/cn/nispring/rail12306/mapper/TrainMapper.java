@@ -13,7 +13,7 @@ public interface TrainMapper {
 
     @Options(useGeneratedKeys = true, keyProperty = "id")
     @Insert("INSERT INTO trains (number) VALUES (#{number})")
-    int insert(TrainEntity train);
+    void insert(TrainEntity train);
 
     @Insert("""
             <script>

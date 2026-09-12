@@ -41,6 +41,36 @@ function toE164OrNull(phone: string): string | null {
   }
 }
 
+// 18 位、前 17 位为数字、出生日期码是真实日期（含闰年校验）、按权重计算校验码（末位可为 X/x）。
+function isValidChinaIdNo(idNo: string): boolean {
+  if (idNo.length !== 18) return false
+  for (let i = 0; i < 17; i += 1) {
+    if (!/[0-9]/.test(idNo[i])) return false
+  }
+
+  // 地址码不做校验。断言出生日期码能解析为真实存在的日期。
+  const year = Number(idNo.slice(6, 10))
+  const month = Number(idNo.slice(10, 12))
+  const day = Number(idNo.slice(12, 14))
+  const date = new Date(Date.UTC(year, month - 1, day))
+  const birthDateValid =
+    date.getUTCFullYear() === year &&
+    date.getUTCMonth() === month - 1 &&
+    date.getUTCDate() === day
+  if (!birthDateValid) return false
+
+  // 计算校验码
+  const weights = [7, 9, 10, 5, 8, 4, 2, 1, 6, 3, 7, 9, 10, 5, 8, 4, 2]
+  const verifyCodes = ['1', '0', 'X', '9', '8', '7', '6', '5', '4', '3', '2']
+  let sum = 0
+  for (let i = 0; i < 17; i += 1) {
+    sum += Number(idNo[i]) * weights[i]
+  }
+  const realCode = verifyCodes[sum % 11]
+  const givenCode = idNo[17].toUpperCase()
+  return realCode === givenCode
+}
+
 export function AddPassengerDialog({ onAdded }: { onAdded: () => void }) {
   const [open, setOpen] = useState(false)
   const [name, setName] = useState('')
@@ -55,6 +85,10 @@ export function AddPassengerDialog({ onAdded }: { onAdded: () => void }) {
     setError('')
     if (!discountType) {
       setError('请选择优惠(待)类型')
+      return
+    }
+    if (idNo && !isValidChinaIdNo(idNo)) {
+      setError('身份证号格式错误')
       return
     }
     if (!phone.trim()) {

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import axios from 'axios'
-import { ChevronDown } from 'lucide-react'
+import { ChevronDown, Trash2 } from 'lucide-react'
 import { pinyin } from 'pinyin-pro'
 import type { Passenger } from '@/types'
 import {
@@ -14,6 +14,14 @@ import { useAuth } from '@/store/auth'
 import { cn } from '@/lib/utils'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { AddPassengerDialog } from '@/components/AddPassengerDialog'
 
 function InfoBox({ label, value }: { label: string; value: string | null | undefined }) {
@@ -42,6 +50,9 @@ export default function Passengers() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [expandedKey, setExpandedKey] = useState<string | null>(null)
+  const [deleteTarget, setDeleteTarget] = useState<Passenger | null>(null)
+  const [deleting, setDeleting] = useState(false)
+  const [deleteError, setDeleteError] = useState('')
 
   useEffect(() => {
     check().finally(() => setLoaded(true))
@@ -60,6 +71,27 @@ export default function Passengers() {
     if (!username) return
     loadPassengers()
   }, [username, loadPassengers])
+
+  async function confirmDelete() {
+    if (!deleteTarget) return
+    setDeleting(true)
+    setDeleteError('')
+    try {
+      await axios.delete('/api/passengers', {
+        params: { idType: deleteTarget.idType, idNo: deleteTarget.idNo },
+      })
+      setDeleteTarget(null)
+      loadPassengers()
+    } catch (err) {
+      if (axios.isAxiosError(err) && err.response) {
+        setDeleteError(err.response.data.message || '删除乘车人失败')
+      } else {
+        setDeleteError('网络错误，请稍后重试')
+      }
+    } finally {
+      setDeleting(false)
+    }
+  }
 
   // isUser 为 true 的乘车人排在最上面
   const main = useMemo(() => passengers.filter(p => p.isUser), [passengers])
@@ -109,31 +141,44 @@ export default function Passengers() {
     return (
       <Card key={key}>
         <CardContent>
-          <button
-            type="button"
-            onClick={() => setExpandedKey(expanded ? null : key)}
-            className={cn(
-              'flex w-full items-center justify-between gap-3 text-left',
-              'aria-expanded cursor-pointer',
-            )}
-            aria-expanded={expanded}
-          >
-            <div className="min-w-0">
-              <div className="flex items-center gap-2">
-                <span className="text-base font-semibold">{p.name}</span>
-                <span className="rounded bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">
-                  {DISCOUNT_TYPE_LABEL[p.discountType] ?? '其他'}
-                </span>
-              </div>
-              <p className="mt-1 text-sm text-muted-foreground">{p.idNo}</p>
-            </div>
-            <ChevronDown
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setExpandedKey(expanded ? null : key)}
               className={cn(
-                'size-4 shrink-0 text-muted-foreground transition-transform',
-                expanded && 'rotate-180',
+                'flex min-w-0 flex-1 items-center justify-between gap-3 text-left',
+                'aria-expanded cursor-pointer',
               )}
-            />
-          </button>
+              aria-expanded={expanded}
+            >
+              <div className="min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="text-base font-semibold">{p.name}</span>
+                  <span className="rounded bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">
+                    {DISCOUNT_TYPE_LABEL[p.discountType] ?? '其他'}
+                  </span>
+                </div>
+                <p className="mt-1 text-sm text-muted-foreground">{p.idNo}</p>
+              </div>
+              <ChevronDown
+                className={cn(
+                  'size-4 shrink-0 text-muted-foreground transition-transform',
+                  expanded && 'rotate-180',
+                )}
+              />
+            </button>
+            {!p.isUser && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-sm"
+                onClick={() => { setDeleteError(''); setDeleteTarget(p) }}
+                aria-label={`删除乘车人 ${p.name}`}
+              >
+                <Trash2 />
+              </Button>
+            )}
+          </div>
 
           {expanded && (
             <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -187,6 +232,28 @@ export default function Passengers() {
           ))}
         </div>
       )}
+
+      <Dialog open={deleteTarget !== null} onOpenChange={open => { if (!open) setDeleteTarget(null) }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>删除乘车人</DialogTitle>
+            <DialogDescription>
+              确定要删除乘车人“{deleteTarget?.name}”吗？删除后需重新添加。
+            </DialogDescription>
+          </DialogHeader>
+          {deleteError && (
+            <p className="text-sm text-destructive">{deleteError}</p>
+          )}
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setDeleteTarget(null)} disabled={deleting}>
+              取消
+            </Button>
+            <Button type="button" variant="destructive" onClick={confirmDelete} disabled={deleting}>
+              {deleting ? '删除中...' : '删除'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

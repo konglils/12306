@@ -50,11 +50,13 @@ function DialogOverlay({
 function DialogContent({
   className,
   children,
+  onInteractOutside,
   showCloseButton = true,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean
 }) {
+  const contentRef = React.useRef<HTMLDivElement>(null)
   return (
     <DialogPortal>
       <DialogOverlay />
@@ -64,6 +66,25 @@ function DialogContent({
           "fixed top-1/2 left-1/2 z-50 grid w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 gap-6 rounded-xl bg-popover p-6 text-sm text-popover-foreground ring-1 ring-foreground/10 duration-100 outline-none sm:max-w-md data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
           className
         )}
+        ref={contentRef}
+        onInteractOutside={(event) => {
+          // 嵌套的 Select/Popover 打开时会临时把 dialog 内容元素的 pointer-events 置为 none，
+          // 这时点击框内空白实际命中其后方的遮罩层而被判为 "点击框外"，导致整个对话框被关闭。
+          // 点击坐标仍落在内容矩形内时，应视为对话框内部点击，不触发关闭。
+          const originalEvent = (event as CustomEvent<{ originalEvent: PointerEvent }>).detail?.originalEvent
+          const rect = contentRef.current?.getBoundingClientRect()
+          if (
+            originalEvent &&
+            rect &&
+            originalEvent.clientX >= rect.left &&
+            originalEvent.clientX <= rect.right &&
+            originalEvent.clientY >= rect.top &&
+            originalEvent.clientY <= rect.bottom
+          ) {
+            event.preventDefault()
+          }
+          onInteractOutside?.(event)
+        }}
         {...props}
       >
         {children}

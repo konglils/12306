@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import axios from 'axios'
 import { ChevronDown } from 'lucide-react'
@@ -14,6 +14,7 @@ import { useAuth } from '@/store/auth'
 import { cn } from '@/lib/utils'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { AddPassengerDialog } from '@/components/AddPassengerDialog'
 
 function InfoBox({ label, value }: { label: string; value: string | null | undefined }) {
   return (
@@ -45,15 +46,19 @@ export default function Passengers() {
     check().finally(() => setLoaded(true))
   }, [check])
 
-  useEffect(() => {
-    if (!username) return
+  const loadPassengers = useCallback(() => {
     setLoading(true)
     setError('')
     axios.get('/api/passengers')
       .then(res => setPassengers(res.data))
       .catch(() => setError('获取乘车人列表失败，请稍后重试'))
       .finally(() => setLoading(false))
-  }, [username])
+  }, [])
+
+  useEffect(() => {
+    if (!username) return
+    loadPassengers()
+  }, [username, loadPassengers])
 
   // isUser 为 true 的乘车人排在最上面
   const main = useMemo(() => passengers.filter(p => p.isUser), [passengers])
@@ -148,6 +153,11 @@ export default function Passengers() {
 
   return (
     <div>
+      <div className="mb-4 flex items-center justify-between">
+        <h1 className="text-xl font-bold">乘车人</h1>
+        <AddPassengerDialog onAdded={loadPassengers} />
+      </div>
+
       {loading && (
         <div className="text-center py-12 text-muted-foreground">加载中...</div>
       )}

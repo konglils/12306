@@ -17,6 +17,7 @@
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
     "date-fns": "^4.4.0",
+    "libphonenumber-js": "^1.13.13",
     "lucide-react": "^1.23.0",
     "pinyin-pro": "^3.29.3",
     "radix-ui": "^1.6.1",

@@ -25,9 +25,10 @@ function InfoBox({ label, value }: { label: string; value: string | null | undef
   )
 }
 
-// 取姓名首个字符的拼音首字母（大写）；非中文字符原样透传，非 A-Z 归入 '#' 组
+// 取姓名首个字符的拼音首字母（大写）；非中文字符原样透传，非 A-Z 归入 '#' 组。
+// 先去除首尾空白，避免姓名带空格被误判进 '#' 组。
 function initialOf(name: string): string {
-  const [first] = pinyin(name, { pattern: 'first', toneType: 'none', type: 'array' })
+  const [first] = pinyin(name.trim(), { pattern: 'first', toneType: 'none', type: 'array' })
   const c = (first ?? '').trim().toUpperCase()
   return /^[A-Z]$/.test(c) ? c : '#'
 }
@@ -50,7 +51,7 @@ export default function Passengers() {
     setLoading(true)
     setError('')
     axios.get('/api/passengers')
-      .then(res => setPassengers(res.data))
+      .then(res => setPassengers((res.data as Passenger[]).map(p => ({ ...p, name: p.name.trim() }))))
       .catch(() => setError('获取乘车人列表失败，请稍后重试'))
       .finally(() => setLoading(false))
   }, [])

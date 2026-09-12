@@ -83,6 +83,11 @@ export function AddPassengerDialog({ onAdded }: { onAdded: () => void }) {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError('')
+    const trimmedName = name.trim()
+    if (!trimmedName) {
+      setError('请填写姓名')
+      return
+    }
     if (!discountType) {
       setError('请选择优惠(待)类型')
       return
@@ -104,7 +109,7 @@ export function AddPassengerDialog({ onAdded }: { onAdded: () => void }) {
     setSubmitting(true)
     try {
       await axios.post('/api/passengers', {
-        name,
+        name: trimmedName,
         idType: 1, // 目前仅支持中国居民身份证
         idNo,
         phone: e164,

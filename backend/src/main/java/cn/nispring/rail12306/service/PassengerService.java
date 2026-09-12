@@ -52,7 +52,7 @@ public class PassengerService {
         entity.setIsUser(false);
         entity.setIdType(passenger.idType());
         entity.setIdNo(passenger.idNo().toUpperCase());
-        entity.setName(passenger.name());
+        entity.setName(passenger.name().trim());
         entity.setDiscountType(passenger.discountType());
         entity.setStatus(PassengerStatus.PENDING);
 

@@ -1,6 +1,7 @@
 package cn.nispring.rail12306.controller;
 
 import cn.nispring.rail12306.exception.BusinessException;
+import cn.nispring.rail12306.model.IdType;
 import cn.nispring.rail12306.model.Passenger;
 import cn.nispring.rail12306.model.User;
 import cn.nispring.rail12306.service.PassengerService;
@@ -42,5 +43,17 @@ public class PassengerController {
         }
 
         passengerService.addPassenger(user, passenger);
+    }
+
+    @DeleteMapping("/passengers")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deletePassenger(@CookieValue("SESSIONID") String sessionToken,
+                                IdType idType, String idNo) {
+        User user = userService.getUser(sessionToken);
+        if (user == null) {
+            throw new BusinessException(HttpStatus.UNAUTHORIZED, "用户未登录");
+        }
+
+        passengerService.deletePassenger(user, idType, idNo);
     }
 }

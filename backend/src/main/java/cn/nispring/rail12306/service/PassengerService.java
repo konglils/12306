@@ -71,4 +71,11 @@ public class PassengerService {
 
         passengerMapper.insert(entity);
     }
+
+    public void deletePassenger(User user, IdType idType, String idNo) {
+        int ndelete = passengerMapper.deleteById(user.id(), idType, idNo);
+        if (ndelete == 0) {
+            throw new BusinessException(HttpStatus.NOT_FOUND, "乘车人不存在");
+        }
+    }
 }

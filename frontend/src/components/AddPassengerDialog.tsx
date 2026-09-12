@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import axios from 'axios'
 import { UserPlus } from 'lucide-react'
+import { parsePhoneNumberWithError } from 'libphonenumber-js'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -12,7 +13,6 @@ import {
 } from '@/components/ui/dialog'
 import {
   Field,
-  FieldDescription,
   FieldGroup,
   FieldLabel,
 } from '@/components/ui/field'
@@ -27,11 +27,18 @@ import {
 } from '@/components/ui/select'
 import { DISCOUNT_TYPE_LABEL } from '@/types'
 
-// 手机号需要带国家代码（后端用 libphonenumber 解析）；中国手机号裸号码自动补 +86
-function normalizePhone(phone: string): string {
-  const p = phone.trim().replace(/[\s()-]/g, '')
-  if (!p.startsWith('+') && /^1\d{10}$/.test(p)) return `+86${p}`
-  return p
+// 用 libphonenumber-js 校验手机号（默认地区 CN）。合法则返回 E164 规格号码（如 +8613800138000），
+// 与后端 parsePhoneE164 的入参要求一致；不合法返回 null。
+function toE164OrNull(phone: string): string | null {
+  const trimmed = phone.trim()
+  if (!trimmed) return null
+  try {
+    const number = parsePhoneNumberWithError(trimmed, 'CN')
+    return number.isValid() ? number.number : null
+  } catch {
+    // 无法解析（如随机字符）抛 ParseError，一律视为格式错误
+    return null
+  }
 }
 
 export function AddPassengerDialog({ onAdded }: { onAdded: () => void }) {
@@ -51,7 +58,12 @@ export function AddPassengerDialog({ onAdded }: { onAdded: () => void }) {
       return
     }
     if (!phone.trim()) {
-      setError('请填写手机号')
+      setError('请填写手机号码')
+      return
+    }
+    const e164 = toE164OrNull(phone)
+    if (!e164) {
+      setError('手机号码格式错误')
       return
     }
 
@@ -61,7 +73,7 @@ export function AddPassengerDialog({ onAdded }: { onAdded: () => void }) {
         name,
         idType: 1, // 目前仅支持中国居民身份证
         idNo,
-        phone: normalizePhone(phone),
+        phone: e164,
         discountType: Number(discountType),
       })
       setOpen(false)
@@ -137,13 +149,13 @@ export function AddPassengerDialog({ onAdded }: { onAdded: () => void }) {
                 </Select>
               </Field>
               <Field>
-                <FieldLabel htmlFor="passenger-phone">手机号</FieldLabel>
+                <FieldLabel htmlFor="passenger-phone">手机号码</FieldLabel>
                 <Input
                   id="passenger-phone"
                   type="tel"
                   value={phone}
                   onChange={e => setPhone(e.target.value)}
-                  placeholder="请填写乘车人手机号"
+                  placeholder="请填写乘车人手机号码"
                 />
               </Field>
               {error && (

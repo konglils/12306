@@ -3,6 +3,7 @@ import { Link, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import Home from '@/pages/Home'
 import Tickets from '@/pages/Tickets'
 import TimeTable from '@/pages/TimeTable'
+import Passengers from '@/pages/Passengers'
 import Signin from '@/pages/Signin'
 import Signup from '@/pages/Signup'
 import NotFound from '@/pages/NotFound'
@@ -36,6 +37,9 @@ export default function App() {
           <TabsList variant="line">
             <TabsTrigger value="/tickets">车票</TabsTrigger>
             <TabsTrigger value="/timetable">时刻表</TabsTrigger>
+            {username && (
+              <TabsTrigger value="/passengers">乘车人</TabsTrigger>
+            )}
           </TabsList>
         </Tabs>
         <div className="flex gap-2 ml-auto items-center">
@@ -64,6 +68,7 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/tickets" element={<Tickets />} />
           <Route path="/timetable" element={<TimeTable />} />
+          <Route path="/passengers" element={<Passengers />} />
           <Route path="/signin" element={<Signin />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="*" element={<NotFound />} />

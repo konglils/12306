@@ -6,6 +6,8 @@ import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 
+import java.util.List;
+
 @Mapper
 public interface PassengerMapper {
 
@@ -16,6 +18,14 @@ public interface PassengerMapper {
             WHERE user_id = #{userId} AND id_type = #{idType} AND id_no = #{idNo}
             """)
     PassengerEntity selectById(Long userId, IdType idType, String idNo);
+
+    @Select("""
+            SELECT user_id, is_user, id_type, id_no, name, phone_e164, email, country_code, birth_date,
+                   sex, valid_through, discount_type, status, updated_at
+            FROM passengers
+            WHERE user_id = #{userId}
+            """)
+    List<PassengerEntity> selectByUser(Long userId);
 
     @Insert("""
             INSERT INTO passengers

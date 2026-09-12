@@ -1,5 +1,8 @@
 package cn.nispring.rail12306.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+
 public enum PassengerStatus {
 
     PENDING(1, "待核验"),
@@ -14,6 +17,7 @@ public enum PassengerStatus {
         this.displayName = displayName;
     }
 
+    @JsonValue
     public int getCode() {
         return code;
     }
@@ -22,6 +26,7 @@ public enum PassengerStatus {
         return displayName;
     }
 
+    @JsonCreator
     public static PassengerStatus fromCode(int code) {
         for (PassengerStatus status : values()) {
             if (status.code == code) {

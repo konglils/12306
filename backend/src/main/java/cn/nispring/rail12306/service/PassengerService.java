@@ -7,10 +7,10 @@ import cn.nispring.rail12306.model.IdType;
 import cn.nispring.rail12306.model.Passenger;
 import cn.nispring.rail12306.model.PassengerStatus;
 import cn.nispring.rail12306.model.User;
-import com.google.i18n.phonenumbers.Phonenumber;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Objects;
 
 import static cn.nispring.rail12306.util.Util.isValidChinaIdNo;
@@ -23,6 +23,23 @@ public class PassengerService {
 
     public PassengerService(PassengerMapper passengerMapper) {
         this.passengerMapper = passengerMapper;
+    }
+
+    public List<Passenger> getPassenger(User user) {
+        return passengerMapper.selectByUser(user.id()).stream().map(entity -> new Passenger(
+                entity.getIsUser(),
+                entity.getIdType(),
+                entity.getIdNo(),
+                entity.getName(),
+                entity.getPhoneE164(),
+                entity.getEmail(),
+                entity.getCountryCode(),
+                entity.getBirthDate(),
+                entity.getSex(),
+                entity.getValidThrough(),
+                entity.getDiscountType(),
+                entity.getStatus()
+        )).toList();
     }
 
     public void addPassenger(User user, Passenger passenger) {

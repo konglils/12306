@@ -72,7 +72,7 @@ public class Util {
 
     public static String parsePhoneE164(String phone) {
         PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
-        Phonenumber.PhoneNumber number = null;
+        Phonenumber.PhoneNumber number;
         try {
             number = phoneUtil.parse(phone, null);
         } catch (NumberParseException e) {

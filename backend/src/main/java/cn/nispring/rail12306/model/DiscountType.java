@@ -1,5 +1,8 @@
 package cn.nispring.rail12306.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+
 public enum DiscountType {
 
     ADULT(1, "成人"),
@@ -16,7 +19,7 @@ public enum DiscountType {
         this.displayName = displayName;
     }
 
-    @com.fasterxml.jackson.annotation.JsonValue
+    @JsonValue
     public int getCode() {
         return code;
     }
@@ -25,7 +28,7 @@ public enum DiscountType {
         return displayName;
     }
 
-    @com.fasterxml.jackson.annotation.JsonCreator
+    @JsonCreator
     public static DiscountType fromCode(int code) {
         for (DiscountType type : values()) {
             if (type.code == code) {

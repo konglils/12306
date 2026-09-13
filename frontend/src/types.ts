@@ -66,8 +66,6 @@ export interface TimeTableRow {
   startTime: string | null
 }
 
-// 与后端 cn.nispring.rail12306.model.Passenger 一一对应。枚举类型以 code（@JsonValue）序列化，
-// 对应的中文名见下方 *_LABEL 映射（code 及 label 与后端枚举的 code/displayName 保持一致）。
 export interface Passenger {
   isUser: boolean
   idType: number // IdType.code

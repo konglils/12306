@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 
 public record Passenger(
-        Boolean isUser,
+        boolean isUser,
         @NotNull(message = "证件类型不能为空") IdType idType,
         @NotBlank(message = "证件号码不能为空") String idNo,
         @NotBlank(message = "姓名不能为空") String name,

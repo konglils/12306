@@ -36,7 +36,7 @@ public class PassengerController {
     @PostMapping("/passengers")
     @ResponseStatus(HttpStatus.CREATED)
     public void addPassenger(@CookieValue("SESSIONID") String sessionToken,
-                               @Valid @RequestBody Passenger passenger) {
+                             @Valid @RequestBody Passenger passenger) {
         User user = userService.getUser(sessionToken);
         if (user == null) {
             throw new BusinessException(HttpStatus.UNAUTHORIZED, "用户未登录");

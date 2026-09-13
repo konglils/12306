@@ -109,6 +109,7 @@ export function AddPassengerDialog({ onAdded }: { onAdded: () => void }) {
     setSubmitting(true)
     try {
       await axios.post('/api/passengers', {
+        isUser: false,
         name: trimmedName,
         idType: 1, // 目前仅支持中国居民身份证
         idNo,

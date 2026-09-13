@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -92,8 +93,13 @@ export function PassengerDialog({
   const [discountType, setDiscountType] = useState('1') // 默认成人
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const [deleteError, setDeleteError] = useState('')
+  const [confirming, setConfirming] = useState(false)
 
   const isEdit = mode === 'edit'
+  // 当前登录用户本人的乘车人不可删除，编辑对话框里不展示删除按钮
+  const canDelete = isEdit && !!passenger && !passenger.isUser
 
   // 打开对话框（或切换编辑对象）时回填表单：编辑模式用乘车人数据，添加模式为空表单
   useEffect(() => {
@@ -103,6 +109,8 @@ export function PassengerDialog({
     setPhone(passenger?.phone ?? '')
     setDiscountType(String(passenger?.discountType ?? 1))
     setError('')
+    setDeleteError('')
+    setConfirming(false)
   }, [open, passenger])
 
   async function handleSubmit(e: React.FormEvent) {
@@ -165,13 +173,53 @@ export function PassengerDialog({
     }
   }
 
+  // 确认界面里点击"删除"后真正执行删除；成功则关闭对话框并刷新列表
+  async function doDelete() {
+    if (!passenger) return
+    setDeleteError('')
+    setDeleting(true)
+    try {
+      await axios.delete('/api/passengers', {
+        params: { idType: passenger.idType, idNo: passenger.idNo },
+      })
+      onOpenChange(false)
+      onSuccess?.()
+    } catch (err) {
+      if (axios.isAxiosError(err) && err.response) {
+        setDeleteError(err.response.data.message || '删除乘车人失败')
+      } else {
+        setDeleteError('网络错误，请稍后重试')
+      }
+    } finally {
+      setDeleting(false)
+    }
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>{isEdit ? '编辑乘车人' : '添加乘车人'}</DialogTitle>
-        </DialogHeader>
-        <form onSubmit={handleSubmit}>
+        {confirming ? (
+          <>
+            <DialogHeader>
+              <DialogTitle>删除乘车人</DialogTitle>
+              <DialogDescription>
+                确定要删除乘车人“{passenger?.name.trim()}”吗？删除后需重新添加。
+              </DialogDescription>
+            </DialogHeader>
+            {deleteError && (
+              <p className="text-sm text-destructive">{deleteError}</p>
+            )}
+            <DialogFooter className="mt-6">
+              <Button type="button" variant="outline" onClick={() => setConfirming(false)} disabled={deleting}>
+                取消
+              </Button>
+              <Button type="button" variant="destructive" onClick={doDelete} disabled={deleting}>
+                {deleting ? '删除中...' : '删除'}
+              </Button>
+            </DialogFooter>
+          </>
+        ) : (
+          <form onSubmit={handleSubmit}>
           <FieldGroup>
             <Field>
               <FieldLabel htmlFor="passenger-idtype">证件类型</FieldLabel>
@@ -235,6 +283,17 @@ export function PassengerDialog({
             )}
           </FieldGroup>
           <DialogFooter className="mt-6">
+            {canDelete && (
+              <Button
+                type="button"
+                variant="outline"
+                className="mr-auto text-destructive"
+                onClick={() => setConfirming(true)}
+                disabled={submitting}
+              >
+                删除
+              </Button>
+            )}
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               取消
             </Button>
@@ -243,6 +302,7 @@ export function PassengerDialog({
             </Button>
           </DialogFooter>
         </form>
+        )}
       </DialogContent>
     </Dialog>
   )

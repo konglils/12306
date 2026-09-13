@@ -1,21 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import axios from 'axios'
-import { Trash2, UserPlus } from 'lucide-react'
+import { Pencil, UserPlus } from 'lucide-react'
 import { pinyin } from 'pinyin-pro'
 import type { Passenger } from '@/types'
 import { DISCOUNT_TYPE_LABEL } from '@/types'
 import { useAuth } from '@/store/auth'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
 import { PassengerDialog } from '@/components/PassengerDialog'
 
 // 取姓名首个字符的拼音首字母（大写）；非中文字符原样透传，非 A-Z 归入 '#' 组。
@@ -36,9 +28,6 @@ export default function Passengers() {
   const [error, setError] = useState('')
   const [addOpen, setAddOpen] = useState(false)
   const [editTarget, setEditTarget] = useState<Passenger | null>(null)
-  const [deleteTarget, setDeleteTarget] = useState<Passenger | null>(null)
-  const [deleting, setDeleting] = useState(false)
-  const [deleteError, setDeleteError] = useState('')
 
   useEffect(() => {
     check().finally(() => setLoaded(true))
@@ -57,27 +46,6 @@ export default function Passengers() {
     if (!username) return
     loadPassengers()
   }, [username, loadPassengers])
-
-  async function confirmDelete() {
-    if (!deleteTarget) return
-    setDeleting(true)
-    setDeleteError('')
-    try {
-      await axios.delete('/api/passengers', {
-        params: { idType: deleteTarget.idType, idNo: deleteTarget.idNo },
-      })
-      setDeleteTarget(null)
-      loadPassengers()
-    } catch (err) {
-      if (axios.isAxiosError(err) && err.response) {
-        setDeleteError(err.response.data.message || '删除乘车人失败')
-      } else {
-        setDeleteError('网络错误，请稍后重试')
-      }
-    } finally {
-      setDeleting(false)
-    }
-  }
 
   // isUser 为 true 的乘车人排在最上面
   const main = useMemo(() => passengers.filter(p => p.isUser), [passengers])
@@ -140,17 +108,15 @@ export default function Passengers() {
               </div>
               <p className="mt-1 text-sm text-muted-foreground">{p.idNo}</p>
             </div>
-            {!p.isUser && (
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon-sm"
-                onClick={(e) => { e.stopPropagation(); setDeleteError(''); setDeleteTarget(p) }}
-                aria-label={`删除乘车人 ${p.name}`}
-              >
-                <Trash2 />
-              </Button>
-            )}
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-sm"
+              onClick={(e) => { e.stopPropagation(); setEditTarget(p) }}
+              aria-label={`编辑乘车人 ${p.name}`}
+            >
+              <Pencil />
+            </Button>
           </div>
         </CardContent>
       </Card>
@@ -209,28 +175,6 @@ export default function Passengers() {
         passenger={editTarget}
         onSuccess={loadPassengers}
       />
-
-      <Dialog open={deleteTarget !== null} onOpenChange={open => { if (!open) setDeleteTarget(null) }}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>删除乘车人</DialogTitle>
-            <DialogDescription>
-              确定要删除乘车人“{deleteTarget?.name}”吗？删除后需重新添加。
-            </DialogDescription>
-          </DialogHeader>
-          {deleteError && (
-            <p className="text-sm text-destructive">{deleteError}</p>
-          )}
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setDeleteTarget(null)} disabled={deleting}>
-              取消
-            </Button>
-            <Button type="button" variant="destructive" onClick={confirmDelete} disabled={deleting}>
-              {deleting ? '删除中...' : '删除'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   )
 }

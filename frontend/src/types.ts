@@ -102,6 +102,7 @@ export const DISCOUNT_TYPE_LABEL: Record<number, string> = {
 export const PASSENGER_STATUS_LABEL: Record<number, string> = {
   1: '待核验',
   2: '已通过',
+  3: '未通过',
 }
 
 export const SEX_LABEL: Record<string, string> = {

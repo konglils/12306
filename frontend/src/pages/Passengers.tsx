@@ -91,6 +91,8 @@ export default function Passengers() {
 
   function renderCard(p: Passenger) {
     const key = `${p.idType}-${p.idNo}`
+    // 已通过(status===2)绿色，未通过(status===3)红色，待核验(status===1)灰色
+    const nameColor = p.status === 2 ? 'text-success' : p.status === 3 ? 'text-destructive' : 'text-muted-foreground'
     return (
       <Card
         key={key}
@@ -101,13 +103,19 @@ export default function Passengers() {
           <div className="flex items-center gap-2">
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2">
-                <span className="text-base font-semibold">{p.name}</span>
+                <span className={`text-base font-semibold ${nameColor}`}>{p.name}</span>
                 <span className="rounded bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">
                   {DISCOUNT_TYPE_LABEL[p.discountType] ?? '其他'}
                 </span>
               </div>
               <p className="mt-1 text-sm text-muted-foreground">{p.idNo}</p>
             </div>
+            {p.status === 1 && (
+              <span className="text-sm text-muted-foreground">身份核验中</span>
+            )}
+            {p.status === 3 && (
+              <span className="text-sm text-destructive">身份未通过</span>
+            )}
             <Button
               type="button"
               variant="ghost"

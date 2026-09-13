@@ -7,6 +7,7 @@ public enum PassengerStatus {
 
     PENDING(1, "待核验"),
     PASSED(2, "已通过"),
+    REJECTED(3, "未通过"),
     ;
 
     private final int code;

@@ -72,6 +72,23 @@ public class PassengerService {
         passengerMapper.insert(entity);
     }
 
+    public void updatePassenger(User user, Passenger passenger) {
+        PassengerEntity entity = new PassengerEntity();
+        entity.setUserId(user.id());
+        entity.setIdType(passenger.idType());
+        entity.setIdNo(passenger.idNo());
+        entity.setDiscountType(passenger.discountType());
+
+        if (passenger.idType().equals(IdType.CHINA_RESIDENT)) {
+            entity.setPhoneE164(passenger.phone());
+        }
+
+        int nupdate = passengerMapper.updateById(entity);
+        if (nupdate == 0) {
+            throw new BusinessException(HttpStatus.NOT_FOUND, "乘车人不存在");
+        }
+    }
+
     public void deletePassenger(User user, IdType idType, String idNo) {
         int ndelete = passengerMapper.deleteById(user.id(), idType, idNo);
         if (ndelete == 0) {

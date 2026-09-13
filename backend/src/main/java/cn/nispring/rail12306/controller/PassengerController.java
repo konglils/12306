@@ -45,6 +45,17 @@ public class PassengerController {
         passengerService.addPassenger(user, passenger);
     }
 
+    @PatchMapping("/passengers")
+    public void updatePassenger(@CookieValue("SESSIONID") String sessionToken,
+                                @Valid @RequestBody Passenger passenger) {
+        User user = userService.getUser(sessionToken);
+        if (user == null) {
+            throw new BusinessException(HttpStatus.UNAUTHORIZED, "用户未登录");
+        }
+
+        passengerService.updatePassenger(user, passenger);
+    }
+
     @DeleteMapping("/passengers")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deletePassenger(@CookieValue("SESSIONID") String sessionToken,

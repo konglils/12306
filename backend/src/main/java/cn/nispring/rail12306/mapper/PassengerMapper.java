@@ -2,10 +2,7 @@ package cn.nispring.rail12306.mapper;
 
 import cn.nispring.rail12306.entity.PassengerEntity;
 import cn.nispring.rail12306.model.IdType;
-import org.apache.ibatis.annotations.Delete;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.*;
 
 import java.util.List;
 
@@ -37,6 +34,14 @@ public interface PassengerMapper {
                  #{countryCode}, #{birthDate}, #{sex}, #{validThrough}, #{discountType}, #{status})
             """)
     void insert(PassengerEntity entity);
+
+    @Update("""
+            UPDATE passengers
+            SET phone_e164 = #{phoneE164}, email = #{email}, country_code = #{countryCode}, birth_date = #{birthDate},
+                sex = #{sex}, valid_through = #{validThrough}, discount_type = #{discountType}
+            WHERE user_id = #{userId} AND id_type = #{idType} AND id_no = #{idNo}
+            """)
+    int updateById(PassengerEntity entity);
 
     @Delete("DELETE FROM passengers WHERE user_id = #{userId} AND id_type = #{idType} AND id_no = #{idNo}")
     int deleteById(Long userId, IdType idType, String idNo);

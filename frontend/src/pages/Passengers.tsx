@@ -1,17 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import axios from 'axios'
-import { ChevronDown, Trash2 } from 'lucide-react'
+import { Trash2, UserPlus } from 'lucide-react'
 import { pinyin } from 'pinyin-pro'
 import type { Passenger } from '@/types'
-import {
-  DISCOUNT_TYPE_LABEL,
-  ID_TYPE_LABEL,
-  PASSENGER_STATUS_LABEL,
-  SEX_LABEL,
-} from '@/types'
+import { DISCOUNT_TYPE_LABEL } from '@/types'
 import { useAuth } from '@/store/auth'
-import { cn } from '@/lib/utils'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import {
@@ -22,16 +16,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { AddPassengerDialog } from '@/components/AddPassengerDialog'
-
-function InfoBox({ label, value }: { label: string; value: string | null | undefined }) {
-  return (
-    <div className="rounded-md bg-muted px-3 py-2">
-      <div className="text-xs text-muted-foreground">{label}</div>
-      <div className="mt-0.5 text-sm text-muted-foreground">{value || '—'}</div>
-    </div>
-  )
-}
+import { PassengerDialog } from '@/components/PassengerDialog'
 
 // 取姓名首个字符的拼音首字母（大写）；非中文字符原样透传，非 A-Z 归入 '#' 组。
 // 先去除首尾空白，避免姓名带空格被误判进 '#' 组。
@@ -49,7 +34,8 @@ export default function Passengers() {
   const [passengers, setPassengers] = useState<Passenger[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [expandedKey, setExpandedKey] = useState<string | null>(null)
+  const [addOpen, setAddOpen] = useState(false)
+  const [editTarget, setEditTarget] = useState<Passenger | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<Passenger | null>(null)
   const [deleting, setDeleting] = useState(false)
   const [deleteError, setDeleteError] = useState('')
@@ -137,61 +123,35 @@ export default function Passengers() {
 
   function renderCard(p: Passenger) {
     const key = `${p.idType}-${p.idNo}`
-    const expanded = expandedKey === key
     return (
-      <Card key={key}>
+      <Card
+        key={key}
+        onClick={() => setEditTarget(p)}
+        className="cursor-pointer"
+      >
         <CardContent>
           <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setExpandedKey(expanded ? null : key)}
-              className={cn(
-                'flex min-w-0 flex-1 items-center justify-between gap-3 text-left',
-                'aria-expanded cursor-pointer',
-              )}
-              aria-expanded={expanded}
-            >
-              <div className="min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className="text-base font-semibold">{p.name}</span>
-                  <span className="rounded bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">
-                    {DISCOUNT_TYPE_LABEL[p.discountType] ?? '其他'}
-                  </span>
-                </div>
-                <p className="mt-1 text-sm text-muted-foreground">{p.idNo}</p>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2">
+                <span className="text-base font-semibold">{p.name}</span>
+                <span className="rounded bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">
+                  {DISCOUNT_TYPE_LABEL[p.discountType] ?? '其他'}
+                </span>
               </div>
-              <ChevronDown
-                className={cn(
-                  'size-4 shrink-0 text-muted-foreground transition-transform',
-                  expanded && 'rotate-180',
-                )}
-              />
-            </button>
+              <p className="mt-1 text-sm text-muted-foreground">{p.idNo}</p>
+            </div>
             {!p.isUser && (
               <Button
                 type="button"
                 variant="ghost"
                 size="icon-sm"
-                onClick={() => { setDeleteError(''); setDeleteTarget(p) }}
+                onClick={(e) => { e.stopPropagation(); setDeleteError(''); setDeleteTarget(p) }}
                 aria-label={`删除乘车人 ${p.name}`}
               >
                 <Trash2 />
               </Button>
             )}
           </div>
-
-          {expanded && (
-            <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <InfoBox label="证件类型" value={ID_TYPE_LABEL[p.idType]} />
-              <InfoBox label="性别" value={SEX_LABEL[p.sex ?? '']} />
-              <InfoBox label="出生日期" value={p.birthDate} />
-              <InfoBox label="手机号" value={p.phone} />
-              <InfoBox label="邮箱" value={p.email} />
-              <InfoBox label="证件有效期至" value={p.validThrough} />
-              <InfoBox label="国籍/地区" value={p.countryCode} />
-              <InfoBox label="核验状态" value={PASSENGER_STATUS_LABEL[p.status]} />
-            </div>
-          )}
         </CardContent>
       </Card>
     )
@@ -201,7 +161,10 @@ export default function Passengers() {
     <div>
       <div className="mb-4 flex items-center justify-between">
         <h1 className="text-xl font-bold">乘车人</h1>
-        <AddPassengerDialog onAdded={loadPassengers} />
+        <Button type="button" onClick={() => setAddOpen(true)}>
+          <UserPlus data-icon="inline-start" />
+          添加乘车人
+        </Button>
       </div>
 
       {loading && (
@@ -232,6 +195,20 @@ export default function Passengers() {
           ))}
         </div>
       )}
+
+      <PassengerDialog
+        mode="add"
+        open={addOpen}
+        onOpenChange={setAddOpen}
+        onSuccess={loadPassengers}
+      />
+      <PassengerDialog
+        mode="edit"
+        open={editTarget !== null}
+        onOpenChange={open => { if (!open) setEditTarget(null) }}
+        passenger={editTarget}
+        onSuccess={loadPassengers}
+      />
 
       <Dialog open={deleteTarget !== null} onOpenChange={open => { if (!open) setDeleteTarget(null) }}>
         <DialogContent className="sm:max-w-md">

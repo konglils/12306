@@ -20,7 +20,7 @@ export default function App() {
   const signout = useAuth(s => s.signout)
   const navigate = useNavigate()
 
-  useEffect(() => { fetchStations(); checkSession() }, [])
+  useEffect(() => { fetchStations(); checkSession() }, [fetchStations, checkSession])
 
   async function handleSignout() {
     await signout()

@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useState } from 'react'
+import { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { format } from 'date-fns'
 import axios from 'axios'
@@ -27,16 +27,7 @@ export default function TimeTable() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  useEffect(() => {
-    const code = searchParams.get('code')
-    if (code) {
-      setInputCode(code)
-      lookup(code)
-    }
-    // 仅挂载时读取 URL 参数，页面内查询走 lookup
-  }, [])
-
-  function lookup(query?: string) {
+  const lookup = useCallback((query?: string) => {
     const c = (query || inputCode).toUpperCase()
     if (!c) return
     const date = searchParams.get('date') || format(new Date(), 'yyyy-MM-dd')
@@ -47,7 +38,21 @@ export default function TimeTable() {
       .then(res => { setRows(res.data); setError('') })
       .catch(() => { setRows(null); setError('未找到该车次') })
       .finally(() => setLoading(false))
-  }
+  }, [inputCode, searchParams, setSearchParams])
+
+  // 仅首次挂载时读取 URL 参数并触发一次查询；页面内的后续查询走 lookup
+  // 用 ref 守卫确保逻辑只跑一次
+  const didInit = useRef(false)
+
+  useEffect(() => {
+    if (didInit.current) return
+    didInit.current = true
+    const code = searchParams.get('code')
+    if (code) {
+      setInputCode(code)
+      lookup(code)
+    }
+  }, [searchParams, lookup])
 
   const stops = rows ?? []
   // Set 按插入顺序迭代，因此这里的顺序就是各车次号首次出现的顺序

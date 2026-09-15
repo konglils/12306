@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, type SubmitEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { Button } from '@/components/ui/button'
@@ -25,7 +25,7 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: SubmitEvent<HTMLFormElement>) {
     e.preventDefault()
     setError('')
 

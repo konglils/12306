@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type SubmitEvent } from 'react'
 import axios from 'axios'
 import { parsePhoneNumberWithError } from 'libphonenumber-js'
 import { Button } from '@/components/ui/button'
@@ -113,7 +113,7 @@ export function PassengerDialog({
     setConfirming(false)
   }, [open, passenger])
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: SubmitEvent<HTMLFormElement>) {
     e.preventDefault()
     setError('')
     const trimmedName = name.trim()

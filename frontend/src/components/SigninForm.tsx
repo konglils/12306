@@ -19,7 +19,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { useAuth } from '@/store/auth'
 
-export function LoginForm({
+export function SigninForm({
   className,
   ...props
 }: React.ComponentProps<'div'>) {

@@ -17,6 +17,22 @@ import {
 } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 
+// 用户名：6-30 位字母、数字或下划线。
+function validateUsername(username: string): string | null {
+  if (!/^[A-Za-z0-9_]{6,30}$/.test(username)) {
+    return '用户名需为 6-30 位字母、数字或下划线'
+  }
+  return null
+}
+
+// 密码：6-30 位字母、数字或下划线。
+function validatePassword(password: string): string | null {
+  if (!/^[A-Za-z0-9_]{6,30}$/.test(password)) {
+    return '密码需为 6-30 位字母、数字或下划线'
+  }
+  return null
+}
+
 export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
   const navigate = useNavigate()
   const [username, setUsername] = useState('')
@@ -28,6 +44,17 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
   async function handleSubmit(e: SubmitEvent<HTMLFormElement>) {
     e.preventDefault()
     setError('')
+
+    const usernameError = validateUsername(username)
+    if (usernameError) {
+      setError(usernameError)
+      return
+    }
+    const passwordError = validatePassword(password)
+    if (passwordError) {
+      setError(passwordError)
+      return
+    }
 
     if (password !== confirm) {
       setError('两次输入的密码不一致')

@@ -1,6 +1,7 @@
 import { useState, type SubmitEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import axios from 'axios'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { PassengerFields } from '@/components/PassengerFields'
 import {
@@ -85,6 +86,7 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
           ...result.values,
         },
       })
+      toast.success('注册成功')
       navigate('/signin')
     } catch (err) {
       if (axios.isAxiosError(err) && err.response) {

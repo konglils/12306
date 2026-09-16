@@ -11,6 +11,7 @@ import { useStations } from '@/store/stations'
 import { useAuth } from '@/store/auth'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Toaster } from '@/components/ui/sonner'
 
 export default function App() {
   const location = useLocation()
@@ -74,6 +75,7 @@ export default function App() {
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
+      <Toaster position="bottom-right" duration={2000} />
     </div>
   )
 }

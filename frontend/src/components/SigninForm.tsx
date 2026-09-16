@@ -1,6 +1,7 @@
 import { useState, type SubmitEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import axios from 'axios'
+import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import {
@@ -36,6 +37,7 @@ export function SigninForm({
     setSubmitting(true)
     try {
       await signin(username, password)
+      toast.success('登录成功')
       navigate('/tickets')
     } catch (err) {
       if (axios.isAxiosError(err) && err.response) {

@@ -21,9 +21,11 @@ import static cn.nispring.rail12306.util.Util.parsePhoneE164;
 public class PassengerService {
 
     private final PassengerMapper passengerMapper;
+    private final IdService idService;
 
-    public PassengerService(PassengerMapper passengerMapper) {
+    public PassengerService(PassengerMapper passengerMapper, IdService idService) {
         this.passengerMapper = passengerMapper;
+        this.idService = idService;
     }
 
     public List<Passenger> getPassenger(User user) {
@@ -72,6 +74,8 @@ public class PassengerService {
         } catch (DuplicateKeyException e) {
             throw new BusinessException(HttpStatus.CONFLICT, "乘车人已存在");
         }
+
+        idService.verify(entity.getUserId(), entity.getIdType(), entity.getIdNo());
     }
 
     public void updatePassenger(User user, Passenger passenger) {

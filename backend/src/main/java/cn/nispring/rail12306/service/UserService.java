@@ -32,14 +32,16 @@ public class UserService {
     private final PassengerMapper passengerMapper;
     private final PassengerService passengerService;
     private final TransactionTemplate transactionTemplate;
+    private final IdService idService;
 
     public UserService(UserMapper userMapper, PassengerMapper passengerMapper, PassengerService passengerService,
-                       TransactionTemplate transactionTemplate) {
+                       TransactionTemplate transactionTemplate, IdService idService) {
         this.passwordEncoder = new BCryptPasswordEncoder();
         this.userMapper = userMapper;
         this.passengerMapper = passengerMapper;
         this.passengerService = passengerService;
         this.transactionTemplate = transactionTemplate;
+        this.idService = idService;
     }
 
     @PostConstruct
@@ -77,6 +79,8 @@ public class UserService {
             passenger.setUserId(user.getId());
             passengerMapper.insert(passenger);
         });
+
+        idService.verify(user.getId(), passenger.getIdType(), passenger.getIdNo());
 
         return new User(user.getId(), user.getUsername());
     }

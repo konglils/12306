@@ -10,6 +10,11 @@ spring:
   flyway:
     enabled: true
 
+  # 开启虚拟线程
+  threads:
+    virtual:
+      enabled: true
+
   mvc:
     # 预期内、已被 GlobalExceptionHandler 正常处理的异常，不再由框架打 WARN
     log-resolved-exception: false

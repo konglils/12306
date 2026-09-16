@@ -7,6 +7,7 @@ import cn.nispring.rail12306.model.IdType;
 import cn.nispring.rail12306.model.Passenger;
 import cn.nispring.rail12306.model.PassengerStatus;
 import cn.nispring.rail12306.model.User;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -42,14 +43,8 @@ public class PassengerService {
         )).toList();
     }
 
-    public void addPassenger(User user, Passenger passenger) {
-        PassengerEntity select = passengerMapper.selectById(user.id(), passenger.idType(), passenger.idNo());
-        if (select != null) {
-            throw new BusinessException(HttpStatus.CONFLICT, "乘车人已存在");
-        }
+    public PassengerEntity makeEntity(Passenger passenger) {
         PassengerEntity entity = new PassengerEntity();
-        entity.setUserId(user.id());
-        entity.setIsUser(false);
         entity.setIdType(passenger.idType());
         entity.setIdNo(passenger.idNo().toUpperCase());
         entity.setName(passenger.name().trim());
@@ -65,11 +60,18 @@ public class PassengerService {
             if (!isValidChinaIdNo(passenger.idNo())) {
                 throw new BusinessException(HttpStatus.BAD_REQUEST, "身份证号格式错误");
             }
-            // TODO 异步发送身份证号和姓名核验
             entity.setPhoneE164(phoneE164);
         }
 
-        passengerMapper.insert(entity);
+        return entity;
+    }
+
+    public void addPassenger(PassengerEntity entity) {
+        try {
+            passengerMapper.insert(entity);
+        } catch (DuplicateKeyException e) {
+            throw new BusinessException(HttpStatus.CONFLICT, "乘车人已存在");
+        }
     }
 
     public void updatePassenger(User user, Passenger passenger) {

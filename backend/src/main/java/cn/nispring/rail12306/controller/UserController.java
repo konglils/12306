@@ -1,10 +1,13 @@
 package cn.nispring.rail12306.controller;
 
+import cn.nispring.rail12306.model.Passenger;
 import cn.nispring.rail12306.model.SessionUser;
+import cn.nispring.rail12306.model.SignUp;
 import cn.nispring.rail12306.model.User;
 import cn.nispring.rail12306.service.UserService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,10 +24,8 @@ public class UserController {
 
     @PostMapping("/users")
     @ResponseStatus(HttpStatus.CREATED)
-    public User signup(@RequestBody Map<String, String> body) {
-        String username = body.get("username");
-        String password = body.get("password");
-        return userService.signup(username, password);
+    public User signup(@Valid @RequestBody SignUp request) {
+        return userService.signup(request);
     }
 
     @PostMapping("/sessions")

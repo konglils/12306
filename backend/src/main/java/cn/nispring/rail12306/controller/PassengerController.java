@@ -1,5 +1,6 @@
 package cn.nispring.rail12306.controller;
 
+import cn.nispring.rail12306.entity.PassengerEntity;
 import cn.nispring.rail12306.exception.BusinessException;
 import cn.nispring.rail12306.model.IdType;
 import cn.nispring.rail12306.model.Passenger;
@@ -42,7 +43,10 @@ public class PassengerController {
             throw new BusinessException(HttpStatus.UNAUTHORIZED, "用户未登录");
         }
 
-        passengerService.addPassenger(user, passenger);
+        PassengerEntity entity = passengerService.makeEntity(passenger);
+        entity.setUserId(user.id());
+        entity.setIsUser(false);
+        passengerService.addPassenger(entity);
     }
 
     @PatchMapping("/passengers")

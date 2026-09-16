@@ -1,14 +1,19 @@
 package cn.nispring.rail12306.service;
 
+import cn.nispring.rail12306.entity.PassengerEntity;
 import cn.nispring.rail12306.entity.UserEntity;
 import cn.nispring.rail12306.exception.BusinessException;
+import cn.nispring.rail12306.mapper.PassengerMapper;
 import cn.nispring.rail12306.mapper.UserMapper;
 import cn.nispring.rail12306.model.SessionUser;
+import cn.nispring.rail12306.model.SignUp;
 import cn.nispring.rail12306.model.User;
 import jakarta.annotation.PostConstruct;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.security.SecureRandom;
 import java.util.Base64;
@@ -24,10 +29,17 @@ public class UserService {
 
     /// 当前登录的用户
     private final ConcurrentHashMap<String, User> sessionMap = new ConcurrentHashMap<>();
+    private final PassengerMapper passengerMapper;
+    private final PassengerService passengerService;
+    private final TransactionTemplate transactionTemplate;
 
-    public UserService(UserMapper userMapper) {
+    public UserService(UserMapper userMapper, PassengerMapper passengerMapper, PassengerService passengerService,
+                       TransactionTemplate transactionTemplate) {
         this.passwordEncoder = new BCryptPasswordEncoder();
         this.userMapper = userMapper;
+        this.passengerMapper = passengerMapper;
+        this.passengerService = passengerService;
+        this.transactionTemplate = transactionTemplate;
     }
 
     @PostConstruct
@@ -39,15 +51,34 @@ public class UserService {
         }
     }
 
-    public User signup(String username, String password) {
-        if (userMapper.selectByUsername(username) != null) {
-            throw new BusinessException(HttpStatus.CONFLICT, "用户名已存在");
+    public User signup(SignUp request) {
+        if (!isUsernameOk(request.username())) {
+            throw new BusinessException(HttpStatus.BAD_REQUEST, "用户名格式错误");
+        }
+        if (!isPasswordOk(request.password())) {
+            throw new BusinessException(HttpStatus.BAD_REQUEST, "密码格式错误");
         }
 
-        String encoded = passwordEncoder.encode(password);
-        UserEntity entity = new UserEntity(null, username, encoded, null, null, null);
-        userMapper.insert(entity);
-        return new User(entity.getId(), entity.getUsername());
+        String encoded = passwordEncoder.encode(request.password());
+        UserEntity user = new UserEntity(null, request.username(), encoded, null, null, null);
+
+        PassengerEntity passenger = passengerService.makeEntity(request.passenger());
+        passenger.setIsUser(true);
+
+        transactionTemplate.executeWithoutResult(status -> {
+            if (passengerMapper.existsUserById(request.passenger().idType(), request.passenger().idNo())) {
+                throw new BusinessException(HttpStatus.CONFLICT, "其他用户已使用该身份注册");
+            }
+            try {
+                userMapper.insert(user);
+            } catch (DuplicateKeyException e) {
+                throw new BusinessException(HttpStatus.CONFLICT, "用户名已存在");
+            }
+            passenger.setUserId(user.getId());
+            passengerMapper.insert(passenger);
+        });
+
+        return new User(user.getId(), user.getUsername());
     }
 
     public SessionUser signin(String username, String password) {
@@ -87,5 +118,13 @@ public class UserService {
         byte[] token = new byte[32];
         secureRandom.nextBytes(token);
         return Base64.getUrlEncoder().withoutPadding().encodeToString(token);
+    }
+
+    private boolean isUsernameOk(String username) {
+        return username.matches("^[A-Za-z0-9_]{6,30}$");
+    }
+
+    private boolean isPasswordOk(String password) {
+        return password.matches("^[A-Za-z0-9_]{6,30}$");
     }
 }

@@ -25,6 +25,12 @@ public interface PassengerMapper {
             """)
     List<PassengerEntity> selectByUser(Long userId);
 
+    // 一定要用 FOR UPDATE 把相关行锁住，防止同事务有其他请求写入
+    @Select("SELECT EXISTS(" +
+            "SELECT 1 FROM passengers WHERE id_type = #{idType} AND id_no = #{idNo} AND is_user = TRUE FOR UPDATE" +
+            ")")
+    boolean existsUserById(IdType idType, String idNo);
+
     @Insert("""
             INSERT INTO passengers
                 (user_id, is_user, id_type, id_no, name, phone_e164, email,

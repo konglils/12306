@@ -118,6 +118,7 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
                 value={username}
                 onChange={e => setUsername(e.target.value)}
                 placeholder="6-30 位字母、数字或下划线"
+                autoFocus
                 required
               />
             </Field>

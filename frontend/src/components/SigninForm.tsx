@@ -69,6 +69,7 @@ export function SigninForm({
                   type="text"
                   value={username}
                   onChange={e => setUsername(e.target.value)}
+                  autoFocus
                   required
                 />
               </Field>

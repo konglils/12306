@@ -1,5 +1,8 @@
 package cn.nispring.rail12306.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+
 public enum SeatType {
 
     HARD_SEAT("1", "硬座"),
@@ -30,7 +33,7 @@ public enum SeatType {
         this.displayName = displayName;
     }
 
-    @com.fasterxml.jackson.annotation.JsonValue
+    @JsonValue
     public String getCode() {
         return code;
     }
@@ -39,7 +42,7 @@ public enum SeatType {
         return displayName;
     }
 
-    @com.fasterxml.jackson.annotation.JsonCreator
+    @JsonCreator
     public static SeatType fromCode(String code) {
         for (SeatType type : values()) {
             if (type.code.equals(code)) {

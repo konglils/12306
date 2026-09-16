@@ -1,10 +1,13 @@
 package cn.nispring.rail12306.controller;
 
-import cn.nispring.rail12306.entity.UserEntity;
+import cn.nispring.rail12306.model.Passenger;
+import cn.nispring.rail12306.model.SessionUser;
+import cn.nispring.rail12306.model.SignUp;
 import cn.nispring.rail12306.model.User;
 import cn.nispring.rail12306.service.UserService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,32 +24,28 @@ public class UserController {
 
     @PostMapping("/users")
     @ResponseStatus(HttpStatus.CREATED)
-    public User signup(@RequestBody Map<String, String> body) {
-        String username = body.get("username");
-        String password = body.get("password");
-        UserEntity entity = userService.signup(username, password);
-        return new User(entity.getId(), entity.getUsername());
+    public User signup(@Valid @RequestBody SignUp request) {
+        return userService.signup(request);
     }
 
     @PostMapping("/sessions")
     public User signin(@RequestBody Map<String, String> body, HttpServletResponse response) {
         String username = body.get("username");
         String password = body.get("password");
-        UserEntity entity = userService.signin(username, password);
+        SessionUser user = userService.signin(username, password);
 
-        Cookie cookie = new Cookie("SESSIONID", entity.getSessionToken());
+        Cookie cookie = new Cookie("SESSIONID", user.sessionToken());
         cookie.setPath("/");
         cookie.setHttpOnly(true);
         cookie.setMaxAge(86400);
         response.addCookie(cookie);
 
-        return new User(entity.getId(), entity.getUsername());
+        return new User(user.id(), user.username());
     }
 
     @GetMapping("/session")
-    public User checkLoggedIn(@CookieValue(value = "SESSIONID", required = false) String sessionToken,
-                              HttpServletResponse response) {
-        return userService.checkLoggedIn(sessionToken);
+    public User getUser(@CookieValue(value = "SESSIONID", required = false) String sessionToken) {
+        return userService.getUser(sessionToken);
     }
 
     @DeleteMapping("/session")

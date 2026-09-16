@@ -1,1 +1,2 @@
 -- 把 seats.graph 提升为 VARBINARY(1000)
+-- 给 passengers 的 id_type 和 id_no 加上索引

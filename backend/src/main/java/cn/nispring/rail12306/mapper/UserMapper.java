@@ -19,7 +19,7 @@ public interface UserMapper {
 
     @Options(useGeneratedKeys = true, keyProperty = "id")
     @Insert("INSERT INTO users (username, password) VALUES (#{username}, #{password})")
-    int insert(UserEntity entity);
+    void insert(UserEntity entity);
 
     @Update("UPDATE users SET session_token = #{sessionToken} WHERE id = #{id}")
     void updateSessionToken(@Param("id") Long id, @Param("sessionToken") String sessionToken);

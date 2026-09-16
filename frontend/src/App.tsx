@@ -3,6 +3,7 @@ import { Link, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import Home from '@/pages/Home'
 import Tickets from '@/pages/Tickets'
 import TimeTable from '@/pages/TimeTable'
+import Passengers from '@/pages/Passengers'
 import Signin from '@/pages/Signin'
 import Signup from '@/pages/Signup'
 import NotFound from '@/pages/NotFound'
@@ -10,6 +11,7 @@ import { useStations } from '@/store/stations'
 import { useAuth } from '@/store/auth'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Toaster } from '@/components/ui/sonner'
 
 export default function App() {
   const location = useLocation()
@@ -19,7 +21,7 @@ export default function App() {
   const signout = useAuth(s => s.signout)
   const navigate = useNavigate()
 
-  useEffect(() => { fetchStations(); checkSession() }, [])
+  useEffect(() => { fetchStations(); checkSession() }, [fetchStations, checkSession])
 
   async function handleSignout() {
     await signout()
@@ -36,6 +38,9 @@ export default function App() {
           <TabsList variant="line">
             <TabsTrigger value="/tickets">车票</TabsTrigger>
             <TabsTrigger value="/timetable">时刻表</TabsTrigger>
+            {username && (
+              <TabsTrigger value="/passengers">乘车人</TabsTrigger>
+            )}
           </TabsList>
         </Tabs>
         <div className="flex gap-2 ml-auto items-center">
@@ -64,11 +69,13 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/tickets" element={<Tickets />} />
           <Route path="/timetable" element={<TimeTable />} />
+          <Route path="/passengers" element={<Passengers />} />
           <Route path="/signin" element={<Signin />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
+      <Toaster position="bottom-right" duration={2000} />
     </div>
   )
 }

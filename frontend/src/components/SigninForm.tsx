@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useState, type SubmitEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import axios from 'axios'
+import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import {
@@ -19,7 +20,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { useAuth } from '@/store/auth'
 
-export function LoginForm({
+export function SigninForm({
   className,
   ...props
 }: React.ComponentProps<'div'>) {
@@ -30,12 +31,13 @@ export function LoginForm({
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: SubmitEvent<HTMLFormElement>) {
     e.preventDefault()
     setError('')
     setSubmitting(true)
     try {
       await signin(username, password)
+      toast.success('登录成功')
       navigate('/tickets')
     } catch (err) {
       if (axios.isAxiosError(err) && err.response) {
@@ -67,6 +69,7 @@ export function LoginForm({
                   type="text"
                   value={username}
                   onChange={e => setUsername(e.target.value)}
+                  autoFocus
                   required
                 />
               </Field>

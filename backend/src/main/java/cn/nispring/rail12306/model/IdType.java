@@ -1,5 +1,8 @@
 package cn.nispring.rail12306.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+
 public enum IdType {
 
     CHINA_RESIDENT(1, "中国居民身份证"),
@@ -20,6 +23,7 @@ public enum IdType {
         this.displayName = displayName;
     }
 
+    @JsonValue
     public int getCode() {
         return code;
     }
@@ -28,6 +32,7 @@ public enum IdType {
         return displayName;
     }
 
+    @JsonCreator
     public static IdType fromCode(int code) {
         for (IdType type : values()) {
             if (type.code == code) {

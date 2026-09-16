@@ -1,5 +1,8 @@
 package cn.nispring.rail12306.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+
 public enum Sex {
 
     MALE("M", "男"),
@@ -14,6 +17,7 @@ public enum Sex {
         this.displayName = displayName;
     }
 
+    @JsonValue
     public String getCode() {
         return code;
     }
@@ -22,6 +26,7 @@ public enum Sex {
         return displayName;
     }
 
+    @JsonCreator
     public static Sex fromCode(String code) {
         for (Sex sex : values()) {
             if (sex.code.equals(code)) {

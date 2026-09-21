@@ -3,11 +3,13 @@ package cn.nispring.rail12306.service;
 import cn.nispring.rail12306.entity.PriceEntity;
 import cn.nispring.rail12306.entity.SeatEntity;
 import cn.nispring.rail12306.entity.StopEntity;
+import cn.nispring.rail12306.exception.BusinessException;
 import cn.nispring.rail12306.mapper.PriceMapper;
 import cn.nispring.rail12306.mapper.SeatMapper;
 import cn.nispring.rail12306.mapper.StopMapper;
 import cn.nispring.rail12306.model.Seat;
 import cn.nispring.rail12306.model.Ticket;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -29,6 +31,30 @@ public class TicketService {
         this.seatMapper = seatMapper;
     }
 
+    public Ticket getOneTicket(LocalDate date, long trainId, long fromAreaId, long toAreaId) {
+        List<PriceEntity> priceEntities = priceMapper.selectByTrainId(date, trainId, fromAreaId, toAreaId);
+        PriceEntity first = priceEntities.getFirst();
+        if (first == null) {
+            throw new BusinessException(HttpStatus.NOT_FOUND, "该日期和地点车次不存在");
+        }
+
+        StopEntity fromStop = stopMapper.selectByStopIdx(date, trainId, first.getFromStopIdx());
+        StopEntity toStop = stopMapper.selectByStopIdx(date, trainId, first.getToStopIdx());
+        if (fromStop == null || toStop == null) {
+            throw new BusinessException(HttpStatus.NOT_FOUND, "该日期和地点车次不存在");
+        }
+
+        return new Ticket(
+                trainId,
+                fromStop.getTrainCode(),
+                stationService.get(fromStop.getStationId()).telecode(),
+                stationService.get(toStop.getStationId()).telecode(),
+                fromStop.getStartTime(),
+                toStop.getArriveDay() - fromStop.getStartDay(),
+                toStop.getArriveTime(),
+                getSeats(date, priceEntities));
+    }
+
     public List<Ticket> getTickets(LocalDate date, long fromAreaId, long toAreaId) {
         List<PriceEntity> priceEntities = priceMapper.select(date, fromAreaId, toAreaId);
         Map<TicketKey, List<PriceEntity>> ticketMap = new HashMap<>();
@@ -40,35 +66,11 @@ public class TicketService {
         List<Ticket> tickets = new ArrayList<>();
         for (List<PriceEntity> prices : ticketMap.values()) {
             PriceEntity first = prices.getFirst();
+            // TODO 事务
             StopEntity fromStop = stopMapper.selectByStopIdx(date, first.getTrainId(), first.getFromStopIdx());
             StopEntity toStop = stopMapper.selectByStopIdx(date, first.getTrainId(), first.getToStopIdx());
             if (fromStop == null || toStop == null) {
                 continue;
-            }
-
-            List<Seat> seats = new ArrayList<>();
-            for (PriceEntity price : prices) {
-                List<SeatEntity> seatEntities = seatMapper.select(date, price.getTrainId(), price.getSeatType(),
-                        price.getFromStopIdx(), price.getToStopIdx() - 1);
-
-                if (seatEntities.isEmpty()) {
-                    seats.add(new Seat(price.getSeatType(), price.getHasSeat(), price.getPrice(), 0));
-                    continue;
-                }
-                byte[] firstGraph = seatEntities.getFirst().getGraph();
-
-                int length = firstGraph.length;
-                byte[] sumGraph = Arrays.copyOf(firstGraph, length);
-                for (int i = 1; i < seatEntities.size(); i += 1) {
-                    for (int j = 0; j < length; j += 1) {
-                        sumGraph[j] &= seatEntities.get(i).getGraph()[j];
-                    }
-                }
-                int numOne = 0;
-                for (int i = 0; i < length; i += 1) {
-                    numOne += Integer.bitCount(sumGraph[i]);
-                }
-                seats.add(new Seat(price.getSeatType(), price.getHasSeat(), price.getPrice(), numOne));
             }
 
             Ticket ticket = new Ticket(
@@ -79,7 +81,7 @@ public class TicketService {
                     fromStop.getStartTime(),
                     toStop.getArriveDay() - fromStop.getStartDay(),
                     toStop.getArriveTime(),
-                    seats);
+                    getSeats(date, prices));
             tickets.add(ticket);
         }
         return tickets;
@@ -90,5 +92,33 @@ public class TicketService {
             Long fromStationId,
             Long toStationId
     ) {
+    }
+
+    private List<Seat> getSeats(LocalDate date, List<PriceEntity> priceEntities) {
+        List<Seat> seats = new ArrayList<>();
+        for (PriceEntity price : priceEntities) {
+            List<SeatEntity> seatEntities = seatMapper.select(date, price.getTrainId(), price.getSeatType(),
+                    price.getFromStopIdx(), price.getToStopIdx() - 1);
+
+            if (seatEntities.isEmpty()) {
+                seats.add(new Seat(price.getSeatType(), price.getHasSeat(), price.getPrice(), 0));
+                continue;
+            }
+            byte[] firstGraph = seatEntities.getFirst().getGraph();
+
+            int length = firstGraph.length;
+            byte[] sumGraph = Arrays.copyOf(firstGraph, length);
+            for (int i = 1; i < seatEntities.size(); i += 1) {
+                for (int j = 0; j < length; j += 1) {
+                    sumGraph[j] &= seatEntities.get(i).getGraph()[j];
+                }
+            }
+            int numOne = 0;
+            for (int i = 0; i < length; i += 1) {
+                numOne += Integer.bitCount(sumGraph[i]);
+            }
+            seats.add(new Seat(price.getSeatType(), price.getHasSeat(), price.getPrice(), numOne));
+        }
+        return seats;
     }
 }

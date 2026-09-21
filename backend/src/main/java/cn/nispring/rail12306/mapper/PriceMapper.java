@@ -37,6 +37,14 @@ public interface PriceMapper {
             "train_date, from_area_id, to_area_id, train_id, from_station_id, to_station_id, " +
             "from_stop_idx, to_stop_idx, seat_type, has_seat, price " +
             "FROM prices " +
+            "WHERE train_date = #{date} AND train_id = #{trainId} " +
+            "AND from_area_id = #{fromAreaId} AND to_area_id = #{toAreaId}")
+    List<PriceEntity> selectByTrainId(LocalDate date, Long trainId, Long fromAreaId, Long toAreaId);
+
+    @Select("SELECT " +
+            "train_date, from_area_id, to_area_id, train_id, from_station_id, to_station_id, " +
+            "from_stop_idx, to_stop_idx, seat_type, has_seat, price " +
+            "FROM prices " +
             "WHERE train_date = #{date} AND from_area_id = #{fromAreaId} AND to_area_id = #{toAreaId} " +
             "ORDER BY train_id")
     List<PriceEntity> select(LocalDate date, Long fromAreaId, Long toAreaId);

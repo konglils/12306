@@ -4,6 +4,7 @@ import cn.nispring.rail12306.model.Ticket;
 import cn.nispring.rail12306.service.TicketService;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
@@ -19,7 +20,12 @@ public class TicketController {
     }
 
     @GetMapping("/tickets")
-    public List<Ticket> getTickets(@DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date, long from, long to) {
-        return ticketService.getTickets(date, from, to);
+    public List<Ticket> getTickets(@DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date,
+                                   @RequestParam(required = false) Long trainId, long from, long to) {
+        if (trainId == null) {
+            return ticketService.getTickets(date, from, to);
+        } else {
+            return List.of(ticketService.getOneTicket(date, trainId, from, to));
+        }
     }
 }

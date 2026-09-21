@@ -48,6 +48,7 @@ export interface Seat {
 }
 
 export interface Ticket {
+  trainId: number
   trainCode: string
   fromTelecode: string
   toTelecode: string

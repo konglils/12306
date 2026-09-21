@@ -6,6 +6,7 @@ import java.time.LocalTime;
 import java.util.List;
 
 public record Ticket(
+        long trainId,
         String trainCode,
         String fromTelecode,
         String toTelecode,

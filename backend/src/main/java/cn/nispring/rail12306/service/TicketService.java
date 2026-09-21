@@ -71,7 +71,9 @@ public class TicketService {
                 seats.add(new Seat(price.getSeatType(), price.getHasSeat(), price.getPrice(), numOne));
             }
 
-            Ticket ticket = new Ticket(fromStop.getTrainCode(),
+            Ticket ticket = new Ticket(
+                    fromStop.getTrainId(),
+                    fromStop.getTrainCode(),
                     stationService.get(fromStop.getStationId()).telecode(),
                     stationService.get(toStop.getStationId()).telecode(),
                     fromStop.getStartTime(),

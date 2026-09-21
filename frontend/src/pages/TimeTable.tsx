@@ -61,7 +61,7 @@ export default function TimeTable() {
   const hasMultipleCodes = distinctCodes.length > 1
 
   return (
-    <div>
+    <div className="space-y-4">
       <Card>
         <CardContent>
         <div className="flex gap-3 items-end">

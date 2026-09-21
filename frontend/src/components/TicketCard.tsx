@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { ChevronDown, ChevronUp } from 'lucide-react'
@@ -38,11 +38,26 @@ interface Props {
 
 export default function TicketCard({ ticket: t, date }: Props) {
   const [expanded, setExpanded] = useState(false)
+  const navigate = useNavigate()
   const isExpanded = expanded
   // 站名以本张票返回的电报码为准映射，而不是查询时选择的站点
   const stationNames = useStations(s => s.stations)
+  const areaIdByTelecode = useStations(s => s.areaIdByTelecode)
   const fromName = stationNames[t.fromTelecode] ?? t.fromTelecode
   const toName = stationNames[t.toTelecode] ?? t.toTelecode
+  // /order 的 from/to 参数是城市区域 id，由本张票的电报码解析
+  const fromAreaId = areaIdByTelecode[t.fromTelecode]
+  const toAreaId = areaIdByTelecode[t.toTelecode]
+
+  // 预订：携带本张票数据跳转下单页，不请求后端；区域 id 未就绪时不跳转
+  function handleBook() {
+    if (fromAreaId === undefined || toAreaId === undefined) return
+    navigate(
+      `/order?date=${encodeURIComponent(date)}&trainId=${t.trainId}` +
+      `&from=${fromAreaId}&to=${toAreaId}`,
+      { state: { ticket: t } },
+    )
+  }
   // 座位按价格从低到高展示
   // 有座类型在前、无座在后；各自组内按价格从低到高
   const seats = useMemo(
@@ -124,7 +139,7 @@ export default function TicketCard({ ticket: t, date }: Props) {
                 size="sm"
                 className="ml-4 w-14"
                 disabled={s.remaining === 0}
-                onClick={e => { e.stopPropagation() }}
+                onClick={e => { e.stopPropagation(); handleBook() }}
               >
                 预订
               </Button>

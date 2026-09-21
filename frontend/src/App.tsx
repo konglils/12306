@@ -4,6 +4,7 @@ import Home from '@/pages/Home'
 import Tickets from '@/pages/Tickets'
 import TimeTable from '@/pages/TimeTable'
 import Passengers from '@/pages/Passengers'
+import Order from '@/pages/Order'
 import Signin from '@/pages/Signin'
 import Signup from '@/pages/Signup'
 import NotFound from '@/pages/NotFound'
@@ -68,6 +69,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/tickets" element={<Tickets />} />
+          <Route path="/order" element={<Order />} />
           <Route path="/timetable" element={<TimeTable />} />
           <Route path="/passengers" element={<Passengers />} />
           <Route path="/signin" element={<Signin />} />

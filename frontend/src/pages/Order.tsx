@@ -16,6 +16,8 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { PassengerPickerDialog } from '@/components/PassengerPickerDialog'
+import { BerthSelector, SeatSelector } from '@/components/SeatService'
+import { getSeatService, type BerthLevel } from '@/lib/seatService'
 
 function formatDate(d: string): string {
   if (!d) return ''
@@ -86,6 +88,17 @@ export default function Order() {
   // 本次下单使用的优惠类型（key -> code），不回写数据库
   const [discountOverrides, setDiscountOverrides] = useState<Record<string, number>>({})
   const [pickerOpen, setPickerOpen] = useState(false)
+  // 选座状态：固定 2 行 × 5 列（A B C D F），所有席别的选座都用这个数组
+  const [seatSelection, setSeatSelection] = useState<boolean[][]>([
+    [false, false, false, false, false],
+    [false, false, false, false, false],
+  ])
+  // 选铺状态：各铺位票数
+  const [berthCounts, setBerthCounts] = useState<Record<BerthLevel, number>>({
+    lower: 0,
+    middle: 0,
+    upper: 0,
+  })
 
   useEffect(() => {
     check().finally(() => setAuthLoaded(true))
@@ -144,6 +157,15 @@ export default function Order() {
     setSeatType(available[0].type)
   }, [ticket, seats, seatType])
 
+  // 切换席别时重置已选的座位/铺位
+  useEffect(() => {
+    setSeatSelection([
+      [false, false, false, false, false],
+      [false, false, false, false, false],
+    ])
+    setBerthCounts({ lower: 0, middle: 0, upper: 0 })
+  }, [seatType])
+
   function handleToggle(key: string, checked: boolean) {
     setSelectedIds(prev => {
       const next = new Set(prev)
@@ -174,6 +196,13 @@ export default function Order() {
 
   // 已勾选的乘车人条目（按乘车人列表顺序）
   const selectedPassengers = passengers.filter(p => selectedIds.has(passengerKey(p)))
+
+  // 选座/选铺服务：无座（hasSeat=false）与无服务席别不显示；未选乘车人时不显示
+  const selectedSeat = seatType ? ticket?.seats.find(s => s.type === seatType) : undefined
+  const service = selectedSeat?.hasSeat && seatType ? getSeatService(seatType) : null
+  const showService = service !== null && selectedPassengers.length >= 1
+  // 选座服务最多支持 5 位乘车人，超出时不显示选座、仅提示；选铺服务不受限制
+  const seatUnavailable = service?.kind === 'seat' && selectedPassengers.length > 5
 
   return (
     <div>
@@ -315,6 +344,49 @@ export default function Order() {
                 })}
               </div>
             )}
+          </section>
+
+          {showService && service && (
+            <section className="mt-8">
+              <h1 className="mb-3 text-lg font-bold">
+                {service.kind === 'seat' ? '选座服务' : '选铺服务'}
+              </h1>
+              {seatUnavailable ? (
+                <p className="text-xs text-muted-foreground">
+                  超过5位乘车人时，暂不支持选座服务。
+                </p>
+              ) : (
+                <>
+                  <Card className="gap-0 px-4 py-3">
+                    {service.kind === 'seat' ? (
+                      <SeatSelector
+                        letters={service.letters}
+                        count={selectedPassengers.length}
+                        value={seatSelection}
+                        onChange={setSeatSelection}
+                      />
+                    ) : (
+                      <BerthSelector
+                        levels={service.levels}
+                        count={selectedPassengers.length}
+                        value={berthCounts}
+                        onChange={setBerthCounts}
+                      />
+                    )}
+                  </Card>
+                  <p className="mt-3 text-xs text-muted-foreground">
+                    {service.kind === 'seat'
+                      ? '若剩余席位无法满足您的需求，系统将自动为您分配席位。'
+                      : '如剩余铺位无法满足您的需求，系统将自动为您分配。'}
+                  </p>
+                </>
+              )}
+            </section>
+          )}
+
+          {/* 提交订单：暂未接入下单接口，占位 */}
+          <section className="mt-8 flex justify-end">
+            <Button size="lg">提交订单</Button>
           </section>
         </>
       )}
